@@ -8,6 +8,18 @@ import time
 from kivymd.app import MDApp
 
 from mediapipe.framework.formats import landmark_pb2
+import mediapipe as mp
+
+'''--------------------- CONFIGURAR LO NECESARIO PARA EL RECONOCIMIENTO DE POSES ------------------------'''
+mp_drawing = mp.solutions.drawing_utils
+mp_pose = mp.solutions.pose
+pose_model = mp_pose.Pose(
+    static_image_mode=False,
+    min_detection_confidence=0.7,
+    smooth_landmarks=True,
+    min_tracking_confidence=0.7
+)
+'''--------------------- FINALIZA: CONFIGURAR LO NECESARIO PARA EL RECONOCIMIENTO DE POSES ------------------------'''
 
 
 '''--------------------------VARIABLES GLOBALES---------------------------'''
@@ -30,6 +42,26 @@ ml = 0
 se = 5
 
 dir = 0
+'''---------------------------------------------   POSE PROCESS  ---------------------------------------------------------'''
+def poseProcess(frame):
+    global mp_pose, pose_model
+    # Recolor image to RGB
+    image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    image.flags.writeable = False
+    # Make detection
+    results = pose_model.process(image)
+    # Recolor back to BGR
+    image.flags.writeable = True
+    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+    return results
+
+    return switch(image, mp_pose, results, ejercicio, amount, serie)
+
+
+
+
+
+
 
 
 '''---------------------------- CONFIGURANDO LA VOZ---------------------------------------------------'''
@@ -44,33 +76,6 @@ engine.setProperty('voice', voices[number].id)
 # controlando el rate, a higuer rate = mas rapido
 engine.setProperty('rate', 150)
 '''---------------------------- FINALIZA: CONFIGURANDO LA VOZ---------------------------------------------------'''
-
-'''---------------------------- CONFIGURANDO LA VOZ---------------------------------------------------'''
-engine2 = pyttsx3.init()
-voices2 = engine2.getProperty('voices')
-# verificando que la voz exista ****REVISAR LUEGO*****
-number2 = 2
-if (len(voices2) == number2):
-    number2 = 0
-    print('es mayor')
-engine2.setProperty('voice', voices2[number2].id)
-# controlando el rate, a higuer rate = mas rapido
-engine2.setProperty('rate', 150)
-'''---------------------------- FINALIZA: CONFIGURANDO LA VOZ---------------------------------------------------'''
-
-'''---------------------------- CONFIGURANDO LA VOZ---------------------------------------------------'''
-engine3 = pyttsx3.init()
-voices3 = engine3.getProperty('voices')
-# verificando que la voz exista ****REVISAR LUEGO*****
-number3 = 2
-if (len(voices3) == number3):
-    number3 = 0
-    print('es mayor')
-engine3.setProperty('voice', voices3[number3].id)
-# controlando el rate, a higuer rate = mas rapido
-engine3.setProperty('rate', 150)
-'''---------------------------- FINALIZA: CONFIGURANDO LA VOZ---------------------------------------------------'''
-
 
 
 
@@ -106,6 +111,7 @@ def draw_cv2(image):
                 cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2, cv2.LINE_AA)
 
 
+
 '''FUNCION QUE DIBUJA LOS LANDMARKS'''
 def draw_landmark(results, mp_drawing, mp_pose, image ):
 
@@ -117,56 +123,43 @@ def draw_landmark(results, mp_drawing, mp_pose, image ):
 '''---------------------------- FINALIZA: DIBUJANDO LA IMAGEN QUE SALDRA ---------------------------------------------------'''
 
 
+
+
 '''---------------------------- OBTENIENDO LA IMAGEN SOLO DE LOS PUNTOS ---------------------------------------------------'''
 
-def draw_left_arm(results,  mp_drawing, image):
-    #Confirgurando el color de la linea
+#Dibujando solo los puntos y lineas del brazo
+def draw_left_arm(results, image):
+    height, width, _ = image.shape
+    x1 = int(results.pose_landmarks.landmark[11].x * width)
+    y1 = int(results.pose_landmarks.landmark[11].y * height)
+    x2 = int(results.pose_landmarks.landmark[13].x * width)
+    y2 = int(results.pose_landmarks.landmark[13].y * height)
+    x3 = int(results.pose_landmarks.landmark[15].x * width)
+    y3 = int(results.pose_landmarks.landmark[15].y * height)
+
     color_line = (255, 255, 255)
     color_circle = (0, 0, 255)
 
-    landmark_subset = landmark_pb2.NormalizedLandmarkList(
-        landmark=[
-            results.pose_landmarks.landmark[13],
-            results.pose_landmarks.landmark[14],
-            results.pose_landmarks.landmark[25],
-            results.pose_landmarks.landmark[26],
-        ]
-    )
-    annotated_image = image.copy()
-    mp_drawing.draw_landmarks(
-        image=annotated_image,
-        landmark_list=landmark_subset)
+    if stage == 'inicial':
+        # Confirgurando el color de la linea
+        color_line = (255, 255, 255)
+        color_circle = (255, 255, 255)
+    else:
+        color_line = (255, 255, 255)
+        color_circle = (0, 0, 255)
 
-    '''x1 = np.array(a)[0]
-    y1 = np.array(a)[1]  # First
-    x2 = np.array(b)[0]
-    y2 = np.array(b)[1]  # Second
-    x3 = np.array(c)[0]
-    y3 = np.array(c)[1]  # Third'''
-
-
-#    cv2.line(image, (x1, y1), (x2, y2), color_line, 3)
- #   cv2.line(image, (x3, y3), (x2, y2), color_line, 3)
-    '''cv2.circle(image, (x1, y1), 10, color_circle, cv2.FILLED)
+    # cv2.line(image, (x1, y1), (x2, y2), color_line, 3)
+    # cv2.line(image, (x3, y3), (x2, y2), color_line, 3)
+    cv2.circle(image, (x1, y1), 10, color_circle, cv2.FILLED)
     cv2.circle(image, (x1, y1), 15, color_circle, 2)
     cv2.circle(image, (x2, y2), 10, color_circle, cv2.FILLED)
     cv2.circle(image, (x2, y2), 15, color_circle, 2)
     cv2.circle(image, (x3, y3), 10, color_circle, cv2.FILLED)
-    cv2.circle(image, (x3, y3), 15, color_circle, 2)'''
-    '''cv2.putText(image, str(int(angle)), (x2 - 50, y2 + 50),
-                    cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 2)'''
+    cv2.circle(image, (x3, y3), 15, color_circle, 2)
 
-def findlist(results, image, draw=True):
-    lmList = []
-    if results.pose_landmarks:
-        for id, lm in enumerate(results.pose_landmarks.landmark):
-            h, w, c = image.shape
-            # print(id, lm)
-            cx, cy = int(lm.x * w), int(lm.y * h)
-            lmList.append([id, cx, cy])
-            if draw:
-                cv2.circle(image, (cx, cy), 5, (255, 0, 0), cv2.FILLED)
-    return lmList
+
+
+
 
 
 
@@ -315,18 +308,20 @@ def calculate_angle(a, b, c):
 
 
 #**************** CALCULANDO EL ANGULO DEL BRAZO IZQUIERDO ******************************
-def leftArmAngle(landmarks, mp_pose, image):
-    '''Obteniendo los puntos------'''
-    left_shoulder = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,
-                     landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
-    left_elbow = [landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].x,
-                  landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].y]
-    left_wrist = [landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x,
-                  landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y]
+def leftArmAngle(results, image):
+    height, width, _ = image.shape
+  
+    int(results.pose_landmarks.landmark[11].x * width)
+    left_shoulder = [int(results.pose_landmarks.landmark[11].x * width),
+                     int(results.pose_landmarks.landmark[11].y * height)]
+    left_elbow = [int(results.pose_landmarks.landmark[13].x * width),
+                  int(results.pose_landmarks.landmark[13].y * height)]
+    left_wrist = [int(results.pose_landmarks.landmark[15].x * width),
+                  int(results.pose_landmarks.landmark[15].y * height)]
 
 
-    if (landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].visibility > 0.90 and landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].visibility > 0.90):
-        threading.Thread(target=draw_left_arm, args=(landmarks, mp_pose, image,)).start()
+    if (results.pose_landmarks.landmark[13].visibility > 0.90 and results.pose_landmarks.landmark[15].visibility > 0.90):
+        threading.Thread(target=draw_left_arm, args=(results, image,)).start()
 
         return calculate_angle(left_shoulder, left_elbow, left_wrist)
 
@@ -359,19 +354,10 @@ def text_to_speech(feedback):
     engine.say(feedback)
     engine.runAndWait()
 
-#Convirtiendo el texto en voz
-def text_to_speech2(feedback):
-    engine2.say(feedback)
-    engine2.runAndWait()
-
-#Convirtiendo el texto en voz
-def text_to_speech3(feedback):
-    engine3.say(feedback)
-    engine3.runAndWait()
 
 
 #Ejercicio de la sentadilla
-def sentadilla(landmarks, mp_pose, image):
+def leftArm(results, image):
     #Ingresando al global stage para modificarlo
     global stage, counter, time_exercise
 
@@ -380,7 +366,7 @@ def sentadilla(landmarks, mp_pose, image):
     list_threads = []
 
     #Obteniendo el angulo
-    left_arm_angle = leftArmAngle(landmarks, mp_pose, image,)
+    left_arm_angle = leftArmAngle(results, image,)
     print('EL ANGULO ES: --------')
     print(left_arm_angle)
 
@@ -410,7 +396,7 @@ def sentadilla(landmarks, mp_pose, image):
                 print(counter)
                 stage = "final"
                 print(time_exercise)
-                threading.Thread(target=text_to_speech2, args=(counter,)).start()
+                threading.Thread(target=text_to_speech, args=(counter,)).start()
             #Abriendo el hilo que mide el tiempo entre los contadores
             threading.Thread(target=thread_timer, args=()).start()
 
@@ -482,67 +468,52 @@ def sentadilla(landmarks, mp_pose, image):
 
 
 
-'''---------------------------------- OBTENIENDO EL PROCESAMIENTO DE POSES-----------------------------------------------------------'''
-
-
-
-
-def pose_estimation_sentadilla(image, mp_drawing, mp_pose, results, amount, serie):
-    global counter, exercise_serie
+'''++++++++++++++++++++++++++++++++++++ OBTENIENDO EL PROCESAMIENTO DE POSES ++++++++++++++++++++++++++++++++++++++++++++++'''
+def pose_estimation_flexion_codo(image, amount, serie):
+    #Obteniendo las variables globales
+    global counter, exercise_serie, mp_pose, mp_drawing
+    #Variable resultados
+    results = ''
     if counter<=amount and exercise_serie<=serie:
-        list_threads = []
         # Extract landmarks
         try:
+            #Obteniendo el result pose
+            results = poseProcess(image)
             landmarks = results.pose_landmarks.landmark
-            #left_leg_angle(landmarks, mp_pose)
-            '''----CREANDO UN CALCULE LOS ANGULOS CORPORALES----'''
-            target_thread_draw = threading.Thread(
-                target=sentadilla, args=(landmarks, mp_pose, image), kwargs={}
-            )
-            list_threads.append(target_thread_draw)
-            target_thread_draw.start()
 
-            '''angle = sentadilla(landmarks, mp_pose)
-            print(angle)
-    
-                # Visualize angle
-            cv2.putText(image, str('hklj'),
-                        (100, 100),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA
-                        )'''
+            #Ingresando al target que hara el calculo de angulos corporales
+            threading.Thread(target=leftArm, args=(results, image), kwargs={}).start()
+
         except:
             pass
 
 
+        #HILO: Dibuja sobre el cv2 los contadores y numeros
+        threading.Thread(target=draw_cv2, args=(image,)).start()
+
+        # HILO: Dibuja los puntos del cuerpo
+        threading.Thread(target=draw_landmark, args=(results, mp_drawing, mp_pose, image,)).start()
 
 
-        '''----CREANDO UN HILO QUE EL CV2---'''
-        target_thread_draw = threading.Thread(
-                target=draw_cv2, args=(image,)
-            )
-        list_threads.append(target_thread_draw)
-        target_thread_draw.start()
-
-        '''----CREANDO UN HILO QUE DIBUJE LOS PUNTOS----'''
-        '''target_thread_landmark = threading.Thread(
-            target=draw_landmark, args=(results, mp_drawing, mp_pose, image, )
-        )
-        list_threads.append(target_thread_landmark)
-        target_thread_landmark.start()'''
-
-
-
-
-    #REVISAR PORQUE SE PARA RECIEN EN LA TERCERA
+        '''EN CASO DE QUE EL EJERCICIO HAYA CUMPLIDO CON EL CONTADOR PERO AUN NO CON LA SERIE'''
     elif exercise_serie<serie:
-        '''----CREANDO QUE CREE LOS PUNTOS----'''
-        #threading.Thread(target=time_counter, args=(image,)).start()
+        #HILO: Contador hacia atras para descanso
         threading.Thread(target=time_counter, args=(image,)).start()
     else:
+        # HILO: Contador que salta un mensaje de finalizacion serie y
+        #devuelve todos los valores a su valor original
         threading.Thread(target=serie_counter, args=(image,)).start()
 
 
     return image
+
+
+
+
+
+'''++++++++++++++++++++++++++++++++++++ FINALIZA: OBTENIENDO EL PROCESAMIENTO DE POSES ++++++++++++++++++++++++++++++++++++++++++++++'''
+
+
 
 
 

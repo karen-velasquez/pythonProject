@@ -96,20 +96,12 @@ class VideoScreen(Screen):
         #cv2.resizeWindow('Hidden', 0, 0)
         # start processing loop
         self.cam = cv2.VideoCapture(1)
-        mp_pose = mp.solutions.pose
-        mp_drawing = mp.solutions.drawing_utils
 
-        with mp_pose.Pose(
-                static_image_mode=False,
-                min_detection_confidence=0.7,
-                smooth_landmarks=True,
-                min_tracking_confidence=0.7) as pose:
-            # start processing loop
-            while (self.do_vid):
-                global ejercicio, serie, amount
-                ret, frame = self.cam.read()
+        while (self.do_vid):
+            global ejercicio, serie, amount
+            ret, frame = self.cam.read()
 
-                frame = caseExercise.poseProcess(frame, pose, mp_drawing, mp_pose, ejercicio, amount, serie)
+            frame = caseExercise.switch_superior_fortalecimiento(frame, ejercicio, amount, serie)
 
                 #frame = exerciseModule.pose_estimation(frame, pose, mp_drawing, mp_pose)
 
@@ -120,7 +112,7 @@ class VideoScreen(Screen):
                 # Must use Clock.schedule_once to get this bit of code
                 # to run back on the main thread (required for GUI operations)
                 # the partial function just says to call the specified method with the provided argument (Clock adds a time argument)
-                Clock.schedule_once(partial(self.display_frame, frame))
+            Clock.schedule_once(partial(self.display_frame, frame))
 
             #cv2.imshow('Hidden', frame)
             #cv2.waitKey(1)
