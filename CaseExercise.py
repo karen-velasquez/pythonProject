@@ -1,15 +1,21 @@
-import ModuleExercise as moduleExercise
+
+import ModuleExerciseSuperiorFort as moduleExerciseSuperiorFort
+import ModuleExerciseSuperiorElong as moduleExerciseSuperiorElong
+import ModuleExerciseInferiorFort as moduleExerciseInferiorFort
+import ModuleExerciseInferiorElong as moduleExerciseInferiorElong
+
+
 
 '''------------------- EN CASO DE QUE EL EJERCICIO SEA DE LA PARTE INFERIOR-----------------------'''
 def switch_inferior_fortalecimiento(image, ejercicio, amount, serie):
     #en caso de que sea igual a sentadilla entonces que lo lleve a ese
-    if ejercicio == "Flexion codo":
-        return moduleExercise.pose_estimation_flexion_codo(image, amount, serie)
+    if ejercicio == "Flexion co":
+        return moduleExerciseInferiorFort.pose_estimation_flexion_codo(image, amount, serie)
 
 def switch_inferior_elongacion(image, ejercicio, amount, serie):
     #en caso de que sea igual a sentadilla entonces que lo lleve a ese
-    if ejercicio == "Flexion codo":
-        return moduleExercise.pose_estimation_flexion_codo(image, amount, serie)
+    if ejercicio == "Flexion co":
+        return moduleExerciseInferiorElong.pose_estimation_flexion_codo(image, amount, serie)
 
 '''------------------- FINALIZA: EN CASO DE QUE EL EJERCICIO SEA DE LA PARTE INFERIOR-----------------------'''
 
@@ -19,13 +25,14 @@ def switch_inferior_elongacion(image, ejercicio, amount, serie):
 def switch_superior_fortalecimiento(image, ejercicio, amount, serie):
     #en caso de que sea igual a sentadilla entonces que lo lleve a ese
     if ejercicio == "Flexion codo":
-        return moduleExercise.pose_estimation_flexion_codo(image, amount, serie)
+        return moduleExerciseSuperiorFort.pose_estimation_flexion_codo(image, amount, serie)
+
 
 
 def switch_superior_elongacion(image, ejercicio, amount, serie):
     #en caso de que sea igual a sentadilla entonces que lo lleve a ese
-    if ejercicio == "Flexion codo":
-        return moduleExercise.pose_estimation_flexion_codo(image, amount, serie)
+    if ejercicio == "Flexion co":
+        return moduleExerciseSuperiorElong.pose_estimation_flexion_codo(image, amount, serie)
 
     elif ejercicio == "PHP":
         return "You can become a backend developer."

@@ -31,7 +31,7 @@ usernameglobal = ''
 token = ''
 #El ejercicio a realizar
 ejercicio = 'Flexion codo'
-tipo = ''
+tipo = 'fortalecimiento'
 parte = 'superior'
 amount = 2
 serie = 1
@@ -66,35 +66,21 @@ class VideoScreen(Screen):
     def on_enter(self):
         #en este treading hacer lo del switch tambie, osea que al escoger tren inferior o algo active el threading de
         # self.parte inferior fortalecimiento o algo asi
-        if parte == 'superior':
-            threading.Thread(target=self.doit, daemon=True).start()
+        if parte == 'superior' and tipo == 'elongacion':
+            threading.Thread(target=self.doSuperiorElong, daemon=True).start()
 
+        elif parte == 'superior' and tipo == 'fortalecimiento':
+            threading.Thread(target=self.doSuperiorFort, daemon=True).start()
 
-        '''print('holaaaaaaaaa')
-        #eliminando cualquier elemento que este en el layout
-        self.removeAllBoxLayout()
+        elif parte == 'inferior' and tipo == 'elongacion':
+            threading.Thread(target=self.doInferiorLong, daemon=True).start()
 
-        #Creando la instancia donde estara la camara
-        self.image = Image(size_hint=(1, .8))
-        layout = self.ids.boxvideo
-        layout.add_widget(self.image)
+        elif parte == 'inferior' and tipo == 'fortalecimiento':
+            threading.Thread(target=self.doInferiorFort, daemon=True).start()
 
-
-        self.capture = cv2.VideoCapture(0)
-        Clock.schedule_interval(self.load_video, 1.0 / 60.0)
-        return layout'''
-
-
-    def doit(self, *args):
+    def doSuperiorFort(self, *args):
         # this code is run in a separate thread
         self.do_vid = True  # flag to stop loop
-        # make a window for use by cv2
-        # flags allow resizing without regard to aspect ratio
-        #cv2.namedWindow('Hidden', cv2.WINDOW_NORMAL | cv2.WINDOW_FREERATIO)
-
-        # resize the window to (0,0) to make it invisible
-        #cv2.resizeWindow('Hidden', 0, 0)
-        # start processing loop
         self.cam = cv2.VideoCapture(1)
 
         while (self.do_vid):
@@ -102,16 +88,60 @@ class VideoScreen(Screen):
             ret, frame = self.cam.read()
 
             frame = caseExercise.switch_superior_fortalecimiento(frame, ejercicio, amount, serie)
+            # the partial function just says to call the specified method with the provided argument (Clock adds a time argument)
+            Clock.schedule_once(partial(self.display_frame, frame))
 
-                #frame = exerciseModule.pose_estimation(frame, pose, mp_drawing, mp_pose)
+            #cv2.imshow('Hidden', frame)
+            #cv2.waitKey(1)
+        self.cam.release()
+        cv2.destroyAllWindows()
 
-                # ...
-                # more code
-                # ...
-                # send this frame to the kivy Image Widget
-                # Must use Clock.schedule_once to get this bit of code
-                # to run back on the main thread (required for GUI operations)
-                # the partial function just says to call the specified method with the provided argument (Clock adds a time argument)
+    def doSuperiorElong(self, *args):
+        # this code is run in a separate thread
+        self.do_vid = True  # flag to stop loop
+        self.cam = cv2.VideoCapture(1)
+
+        while (self.do_vid):
+            global ejercicio, serie, amount
+            ret, frame = self.cam.read()
+
+            frame = caseExercise.switch_superior_elongacion(frame, ejercicio, amount, serie)
+            # the partial function just says to call the specified method with the provided argument (Clock adds a time argument)
+            Clock.schedule_once(partial(self.display_frame, frame))
+
+            #cv2.imshow('Hidden', frame)
+            #cv2.waitKey(1)
+        self.cam.release()
+        cv2.destroyAllWindows()
+
+    def doInferiorFort(self, *args):
+        # this code is run in a separate thread
+        self.do_vid = True  # flag to stop loop
+        self.cam = cv2.VideoCapture(1)
+
+        while (self.do_vid):
+            global ejercicio, serie, amount
+            ret, frame = self.cam.read()
+
+            frame = caseExercise.switch_inferior_fortalecimiento(frame, ejercicio, amount, serie)
+            # the partial function just says to call the specified method with the provided argument (Clock adds a time argument)
+            Clock.schedule_once(partial(self.display_frame, frame))
+
+            #cv2.imshow('Hidden', frame)
+            #cv2.waitKey(1)
+        self.cam.release()
+        cv2.destroyAllWindows()
+
+    def doInferiorLong(self, *args):
+        # this code is run in a separate thread
+        self.do_vid = True  # flag to stop loop
+        self.cam = cv2.VideoCapture(1)
+        while (self.do_vid):
+            global ejercicio, serie, amount
+            ret, frame = self.cam.read()
+
+            frame = caseExercise.switch_inferior_elongacion(frame, ejercicio, amount, serie)
+            # the partial function just says to call the specified method with the provided argument (Clock adds a time argument)
             Clock.schedule_once(partial(self.display_frame, frame))
 
             #cv2.imshow('Hidden', frame)
@@ -141,28 +171,6 @@ class VideoScreen(Screen):
 
 
 
-
-
-    '''def load_video(self, *args):
-        ret, frame = self.capture.read()
-        # Frame initialize
-
-        exerciseInstance = exercise.SimulateTargetExercices
-        frame = exerciseInstance.la_prueba(self,frame)
-
-        # flip horizontal and convert to image
-        buffer = cv2.flip(frame, 0).tostring()
-        texture = Texture.create(size=(frame.shape[1], frame.shape[0]), colorfmt='bgr')
-        texture.blit_buffer(buffer, colorfmt='bgr', bufferfmt='ubyte')
-        self.image.texture = texture
-
-
-    def removeAllBoxLayout(self):
-        rows = [i for i in self.ids.boxvideo.children]
-        print("------------")
-        for row1 in rows:
-            #Eliminando el label que esta dentro
-            self.ids.boxvideo.remove_widget(row1)'''
 
 
 
@@ -211,6 +219,9 @@ class ListExerciseScreen(Screen):
         MDApp.get_running_app().root.current = 'video'
 
         print(item['ejercicioId']['nombre'])
+
+
+
 
 
 # Create the screen manager
