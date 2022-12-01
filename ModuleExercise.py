@@ -89,32 +89,30 @@ engine.setProperty('rate', 150)
 '''FUNCION QUE DIBUJA SOBRE EL CV2'''
 def draw_cv2(image):
     global counter, stage, wrong_counter
-    cv2.rectangle(image, (0, 0), (300, 73), (245, 117, 16), -1)
-    '''Realizando el conteo de repeticiones'''
-    cv2.putText(image, 'REPS', (15, 12),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
-    cv2.putText(image, str(counter),
-                            (10, 60),
-                    cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2, cv2.LINE_AA)
-    '''Realizando la actualizacion de estado'''
-    cv2.putText(image, 'STAGE', (65, 12),
+    #Estado de la posicion
+    '''cv2.putText(image, 'STAGE', (65, 12),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
     cv2.putText(image, stage,
                     (60, 60),
                     cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2, cv2.LINE_AA)
-    '''Realizando el conteo de repeticiones erroneas'''
-    cv2.putText(image, 'ERRONEAS', (150, 12),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
+'''
+    #Contador general
+    cv2.rectangle(image, (0, 0), (200, 50), (255, 0, 0), -1)
+    cv2.rectangle(image, (202, 0), (265, 50), (255, 0, 0), 2)
+    cv2.putText(image, "Contador:", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+    cv2.putText(image, "{}".format(counter), (220, 35), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (128, 0, 250), 2)
 
-    cv2.putText(image, str(wrong_counter),
-                (150, 60),
-                cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2, cv2.LINE_AA)
+    #Contador de erroneas
+    cv2.rectangle(image, (0, 50), (200, 100), (255, 255, 0), -1)
+    cv2.rectangle(image, (202, 50), (265, 100), (255, 255, 0), 2)
+    cv2.putText(image, "Erroneas:", (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+    cv2.putText(image, "{}".format(wrong_counter), (220, 85), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (128, 0, 250), 2)
+
 
 
 
 '''FUNCION QUE DIBUJA LOS LANDMARKS'''
 def draw_landmark(results, mp_drawing, mp_pose, image ):
-
     # Render detections
     mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS,
                                     mp_drawing.DrawingSpec(color=(245, 117, 66), thickness=2, circle_radius=2),
@@ -137,7 +135,7 @@ def draw_left_arm(results, image):
     x3 = int(results.pose_landmarks.landmark[15].x * width)
     y3 = int(results.pose_landmarks.landmark[15].y * height)
 
-    color_line = (255, 255, 255)
+    color_line = (0, 0, 255)
     color_circle = (0, 0, 255)
 
     if stage == 'inicial':
@@ -145,11 +143,11 @@ def draw_left_arm(results, image):
         color_line = (255, 255, 255)
         color_circle = (255, 255, 255)
     else:
-        color_line = (255, 255, 255)
+        color_line = (0, 0, 255)
         color_circle = (0, 0, 255)
 
-    # cv2.line(image, (x1, y1), (x2, y2), color_line, 3)
-    # cv2.line(image, (x3, y3), (x2, y2), color_line, 3)
+    cv2.line(image, (x1, y1), (x2, y2), color_line, 3)
+    cv2.line(image, (x3, y3), (x2, y2), color_line, 3)
     cv2.circle(image, (x1, y1), 10, color_circle, cv2.FILLED)
     cv2.circle(image, (x1, y1), 15, color_circle, 2)
     cv2.circle(image, (x2, y2), 10, color_circle, cv2.FILLED)
@@ -200,7 +198,8 @@ def draw_cv2_error_time(texto_error, image):
                 # Rep data
     cv2.putText(image, texto_error, (120, 270),
                     cv2.FONT_HERSHEY_SIMPLEX, 1.4, (255, 255, 255), 3, cv2.LINE_AA)
-    time.sleep(2)
+    time.sleep(3)
+
 
 
 
@@ -223,44 +222,53 @@ def draw_landmark_2(results, mp_drawing, mp_pose, image ):
 
 '''---------------------------- DIBUJANDO EL BAR ---------------------------------------------------'''
 '''FUNCION QUE DIBUJA SOBRE EL CV2'''
-
-
-
-
 def draw_cv2_bar(angle, image):
-    global count, dir
-    # angle = detector.findAngle(img, 11, 13, 15,False)
-    '''per = np.interp(angle, (170, 90), (0, 100))
-    bar = np.interp(angle, (170, 90), (650, 100))'''
-
-    per = np.interp(angle, (90, 160), (0, 20))
-    bar = np.interp(angle, (90, 160), (400, 60))
-
-    print('ES EL PER')
-    print(per)
-
-    print('ES EL BAR')
-    print(bar)
-    # print(angle, per)
+    #Obteniendo los valores globales
+    global count, dir, stage
 
     # Check for the dumbbell curls
     color = (255, 0, 255)
-    if per == 100:
-        color = (0, 255, 0)
-        if dir == 0:
-            count += 0.5
-            dir = 1
-    if per == 0:
-        color = (0, 255, 0)
-        if dir == 1:
-            count += 0.5
-            dir = 0
+    if stage == 'inicial':
+        color = (255,255,255)
+        # angle = detector.findAngle(img, 11, 13, 15,False)
+        '''per = np.interp(angle, (170, 90), (0, 100))
+        bar = np.interp(angle, (170, 90), (650, 100))'''
+        #porcentaje
+        per = np.interp(angle, (90, 160), (0, 150))
+        #valor del bar
+        bar = np.interp(angle, (90, 160), (400, 150))
 
-    # Draw Bar
-    cv2.rectangle(image, (120, 40), (175, 60), color, 3)
-    cv2.rectangle(image, (120, int(bar)), (175, 60), color, cv2.FILLED)
-    cv2.putText(image, f'{int(per)} %', (120, 0), cv2.FONT_HERSHEY_PLAIN, 4,
-                color, 4)
+        print('ES EL PER')
+        print(per)
+
+        print('ES EL BAR')
+        print(bar)
+        # print(angle, per)
+
+
+        if per == 100:
+            color = (0, 255, 0)
+            if dir == 0:
+                count += 0.5
+                dir = 1
+        if per == 0:
+            color = (0, 255, 0)
+            if dir == 1:
+                count += 0.5
+                dir = 0
+
+        # Draw Bar
+        #Rectangulo general
+        cv2.rectangle(image, (120, 150), (160, 400), color, 3)
+
+        #Llenando el rectangulo
+        cv2.rectangle(image, (120, int(bar)), (160, 400), color, cv2.FILLED)
+        cv2.putText(image, f'{int(per)} %', (120, 0), cv2.FONT_HERSHEY_PLAIN, 4,
+                    color, 4)
+    else:
+        # Draw Bar
+        cv2.rectangle(image, (120, 150), (160, 400), color, 3)
+
 
 
 def draw_performance_bar(self, img, per, bar, color, count):
@@ -319,15 +327,10 @@ def leftArmAngle(results, image):
     left_wrist = [int(results.pose_landmarks.landmark[15].x * width),
                   int(results.pose_landmarks.landmark[15].y * height)]
 
+    threading.Thread(target=draw_left_arm, args=(results, image,)).start()
 
-    if (results.pose_landmarks.landmark[13].visibility > 0.90 and results.pose_landmarks.landmark[15].visibility > 0.90):
-        threading.Thread(target=draw_left_arm, args=(results, image,)).start()
+    return calculate_angle(left_shoulder, left_elbow, left_wrist)
 
-        return calculate_angle(left_shoulder, left_elbow, left_wrist)
-
-
-    else:
-        return 0
 
 '''---------------------------- FINALIZA: CALCULANDO LOS ANGULOS NECESARIOS ---------------------------------------------------'''
 
@@ -359,86 +362,57 @@ def text_to_speech(feedback):
 #Ejercicio de la sentadilla
 def leftArm(results, image):
     #Ingresando al global stage para modificarlo
-    global stage, counter, time_exercise
+    global stage, counter, time_exercise, wrong_counter
 
+    #Verificando que se vean los puntos del brazo
+    if (results.pose_landmarks.landmark[13].visibility > 0.90 and results.pose_landmarks.landmark[15].visibility > 0.90):
+        left_arm_angle = leftArmAngle(results, image,)
+        print('EL ANGULO ES: --------')
+        print(left_arm_angle)
 
-    #creando la lista de hilos
-    list_threads = []
+        #HILO: Creando el draw bar
 
-    #Obteniendo el angulo
-    left_arm_angle = leftArmAngle(results, image,)
-    print('EL ANGULO ES: --------')
-    print(left_arm_angle)
-
-    if left_arm_angle != 0:
-
-        '''----CREANDO UN HILO QUE EL CV2 BAR---'''
-        target_thread_draw = threading.Thread(target=draw_cv2_bar, args=(left_arm_angle,image,))
-        target_thread_draw.start()
-
-
+        threading.Thread(target=draw_cv2_bar, args=(left_arm_angle,image,)).start()
 
         if left_arm_angle > 160:
             stage = "inicial"
+
         if left_arm_angle > 80 and left_arm_angle < 90 and stage == "inicial":
 
             if time_exercise<1.8:
+                stage = 'final'
                 time_exercise = 0.0
+                wrong_counter = wrong_counter + 1
                 feedback = 'Hazlo mas lento!!!'
-                print('EL NUMERO ES:\n')
-                print('--------------------------------')
+                #HILO: Informando del error de tiempo : muy rapido!!!
                 threading.Thread(target=draw_cv2_error_time, args=(feedback, image,)).start()
-                #threading.Thread(target=text_to_speech2, args=(feedback,)).start()
-            else:
 
-                counter = counter + 1
-                print('EL NUMERO ES:\n')
-                print(counter)
+            else:
                 stage = "final"
+                counter = counter + 1
                 print(time_exercise)
+                #HILO: Contabilizando la cantidad de repeticiones
                 threading.Thread(target=text_to_speech, args=(counter,)).start()
-            #Abriendo el hilo que mide el tiempo entre los contadores
+
+            #HILO: Abriendo el hilo que mide el tiempo entre los contadores
             threading.Thread(target=thread_timer, args=()).start()
 
 
-
         elif left_arm_angle < 70 and stage == "inicial":
-            global wrong_counter
-
+            stage = "final"
             feedback = "Estas flexionando mucho tu brazo"
             wrong_counter = wrong_counter + 1
-            stage = "final"
-
-
-            # Abriendo el hilo que dara la retroalimentacion
-            '''print('el angulo de error\n')'''
-
-            target_thread_draw = threading.Thread(
-                target=draw_cv2_error_flexion, args=(feedback, image,)
-            )
-            list_threads.append(target_thread_draw)
-            target_thread_draw.start()
+            #Informando del error de flexion
+            threading.Thread(target=draw_cv2_error_flexion, args=(feedback, image,)).start()
 
         '''print('\nlos otros angulos\n')
         print(left_arm_angle)'''
 
     else:
         feedback = 'NO SE VE TU BRAZO'
-        '''----CREANDO UN HILO QUE EL CV2---'''
-        target_thread_draw = threading.Thread(
-            target=draw_cv2_error, args=(feedback, image,)
-        )
-        list_threads.append(target_thread_draw)
-        target_thread_draw.start()
+        #HILO: Creando el hilo que indica si se ven los puntos necesarios para el analisis
+        threading.Thread(target=draw_cv2_error, args=(feedback, image,)).start()
 
-
-        #threading.Thread(target=text_to_speech3, args=(feedback,)).start()
-        '''speaker_thread_3 = threading.Thread(
-            target=text_to_speech3, args=(feedback,), kwargs={}
-        )
-        list_threads.append(speaker_thread_3)
-        speaker_thread_3.start()
-'''
 
 
 '''---------------------------- FINALIZA: FEEDBACK DE LOS EJERCICIOS - FORTALECIMIENTO - TREN INFERIOR ---------------------------------------------------'''
@@ -484,15 +458,17 @@ def pose_estimation_flexion_codo(image, amount, serie):
             #Ingresando al target que hara el calculo de angulos corporales
             threading.Thread(target=leftArm, args=(results, image), kwargs={}).start()
 
+
         except:
             pass
-
 
         #HILO: Dibuja sobre el cv2 los contadores y numeros
         threading.Thread(target=draw_cv2, args=(image,)).start()
 
+
+
         # HILO: Dibuja los puntos del cuerpo
-        threading.Thread(target=draw_landmark, args=(results, mp_drawing, mp_pose, image,)).start()
+        '''threading.Thread(target=draw_landmark, args=(results, mp_drawing, mp_pose, image,)).start()'''
 
 
         '''EN CASO DE QUE EL EJERCICIO HAYA CUMPLIDO CON EL CONTADOR PERO AUN NO CON LA SERIE'''
