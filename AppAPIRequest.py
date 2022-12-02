@@ -1,8 +1,9 @@
 from kivymd.app import MDApp
 import APIRequest as request
 
+endpoint = 'http://localhost:5000/'
 # Inicializando
-endpoint = 'http://sistemafisioterapiabackend-env.eba-5tweru88.us-east-1.elasticbeanstalk.com/'
+#endpoint = 'http://sistemafisioterapiabackend-env.eba-5tweru88.us-east-1.elasticbeanstalk.com/'
 token = ''
 listaEjercicios = ''
 class AppAPIRequest():

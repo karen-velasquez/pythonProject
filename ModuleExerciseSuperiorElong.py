@@ -89,13 +89,7 @@ engine.setProperty('rate', 150)
 '''FUNCION QUE DIBUJA SOBRE EL CV2'''
 def draw_cv2(image):
     global counter, stage, wrong_counter
-    #Estado de la posicion
-    '''cv2.putText(image, 'STAGE', (65, 12),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
-    cv2.putText(image, stage,
-                    (60, 60),
-                    cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2, cv2.LINE_AA)
-'''
+
     #Contador general
     cv2.rectangle(image, (0, 0), (200, 50), (255, 0, 0), -1)
     cv2.rectangle(image, (202, 0), (265, 50), (255, 0, 0), 2)

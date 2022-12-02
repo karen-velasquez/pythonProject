@@ -139,33 +139,54 @@ ScreenManager:
 
 <ListExerciseScreen>:
     name: 'listExercise'
-    MDLabel:
-        pos_hint: {'center_x': .5,'center_y': .90}
-        font_name: "styles/Poppins-SemiBold.ttf"
-        font_size: "40sp"
-        theme_text_color: "Custom"
-        text_color: 60/255, 43/255, 117/255, 1
-        text: 'Ejercicios Asignados'
-        halign: 'center'
+    MDBoxLayout:
+        orientation: "vertical"
 
-    MDLabel:
-        adaptive_size: True
-        height: dp(48)
-        text: 'Realiza los ejercicios asignados\n\n constantemente para una buena recuperacion !!!!'
-        halign: 'center'
-        pos_hint: {'center_x': .5,'center_y': .80}
+        MDTopAppBar:
+            title: "Sistema de Seguimiento"
+            use_overflow: True
+            right_action_items:
+                [
+                ["home", lambda x: app.callback(x), "Home"],
+                ["message-star", lambda x: app.callback(x), "Message star"],
+                ["message-question", lambda x: app.callback(x), "Message question"],
+                ["message-reply", lambda x: app.callback(x), "Message reply"],
+                ]
+
+        MDLabel:
+            font_name: "styles/Poppins-SemiBold.ttf"
+            font_size: "40sp"
+            theme_text_color: "Custom"
+            text_color: 60/255, 43/255, 117/255, 1
+            text: 'Ejercicios Asignados'
+            halign: 'center'
+            size_hint_y: None
+            pos_hint: {"center_x": .5, "center_y": .9}
+
+        MDLabel:
+            adaptive_size: True
+            height: "20sp"
+            pos_hint: {"center_x": .5, "center_y": .2}
+            size_hint_y: None
+            text: 'Realiza los ejercicios asignados\n\n constantemente para una buena recuperacion !!!!'
+            halign: 'center'
 
 
-    Carousel:
-        id: carousel
+        Carousel:
+            id: carousel
+            pos_hint: {"center_x": .5, "center_y": .5}
+
+
+        MDRectangleFlatButton:
+            text: 'Back'
+            pos_hint: {'center_x':0.5,'center_y':0.1}
+            on_press:
+                root.manager.transition.direction = 'left'
+                root.manager.current = 'menu'
 
 
 
-
-    MDRectangleFlatButton:
-        text: 'Back'
-        pos_hint: {'center_x':0.5,'center_y':0.1}
-        on_press:
-            root.manager.transition.direction = 'left'
-            root.manager.current = 'menu'
-
+<PopUpCamera>:
+    name: 'popUpCamera'
+    DropDown:
+        name: 'dropDown'

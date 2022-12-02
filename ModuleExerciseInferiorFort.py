@@ -89,13 +89,6 @@ engine.setProperty('rate', 150)
 '''FUNCION QUE DIBUJA SOBRE EL CV2'''
 def draw_cv2(image):
     global counter, stage, wrong_counter
-    #Estado de la posicion
-    '''cv2.putText(image, 'STAGE', (65, 12),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
-    cv2.putText(image, stage,
-                    (60, 60),
-                    cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2, cv2.LINE_AA)
-'''
     #Contador general
     cv2.rectangle(image, (0, 0), (200, 50), (255, 0, 0), -1)
     cv2.rectangle(image, (202, 0), (265, 50), (255, 0, 0), 2)
@@ -126,14 +119,14 @@ def draw_landmark(results, mp_drawing, mp_pose, image ):
 '''---------------------------- OBTENIENDO LA IMAGEN SOLO DE LOS PUNTOS ---------------------------------------------------'''
 
 #Dibujando solo los puntos y lineas del brazo
-def draw_left_arm(results, image):
+def draw_left_leg(results, image):
     height, width, _ = image.shape
-    x1 = int(results.pose_landmarks.landmark[11].x * width)
-    y1 = int(results.pose_landmarks.landmark[11].y * height)
-    x2 = int(results.pose_landmarks.landmark[13].x * width)
-    y2 = int(results.pose_landmarks.landmark[13].y * height)
-    x3 = int(results.pose_landmarks.landmark[15].x * width)
-    y3 = int(results.pose_landmarks.landmark[15].y * height)
+    x1 = int(results.pose_landmarks.landmark[23].x * width)
+    y1 = int(results.pose_landmarks.landmark[23].y * height)
+    x2 = int(results.pose_landmarks.landmark[25].x * width)
+    y2 = int(results.pose_landmarks.landmark[25].y * height)
+    x3 = int(results.pose_landmarks.landmark[27].x * width)
+    y3 = int(results.pose_landmarks.landmark[27].y * height)
 
     color_line = (0, 0, 255)
     color_circle = (0, 0, 255)
@@ -222,7 +215,7 @@ def draw_landmark_2(results, mp_drawing, mp_pose, image ):
 
 '''---------------------------- DIBUJANDO EL BAR ---------------------------------------------------'''
 '''FUNCION QUE DIBUJA SOBRE EL CV2'''
-def draw_cv2_bar(angle, image):
+def draw_cv2_bar(angle, max, min, image):
     #Obteniendo los valores globales
     global count, dir, stage
 
@@ -234,9 +227,9 @@ def draw_cv2_bar(angle, image):
         '''per = np.interp(angle, (170, 90), (0, 100))
         bar = np.interp(angle, (170, 90), (650, 100))'''
         #porcentaje
-        per = np.interp(angle, (90, 160), (0, 150))
+        per = np.interp(angle, (min, max), (0, 150))
         #valor del bar
-        bar = np.interp(angle, (90, 160), (400, 150))
+        bar = np.interp(angle, (min, max), (400, 150))
 
         print('ES EL PER')
         print(per)
@@ -316,20 +309,19 @@ def calculate_angle(a, b, c):
 
 
 #**************** CALCULANDO EL ANGULO DEL BRAZO IZQUIERDO ******************************
-def leftArmAngle(results, image):
+def leftLegAngle(results, image):
     height, width, _ = image.shape
-  
-    int(results.pose_landmarks.landmark[11].x * width)
-    left_shoulder = [int(results.pose_landmarks.landmark[11].x * width),
-                     int(results.pose_landmarks.landmark[11].y * height)]
-    left_elbow = [int(results.pose_landmarks.landmark[13].x * width),
-                  int(results.pose_landmarks.landmark[13].y * height)]
-    left_wrist = [int(results.pose_landmarks.landmark[15].x * width),
-                  int(results.pose_landmarks.landmark[15].y * height)]
 
-    threading.Thread(target=draw_left_arm, args=(results, image,)).start()
+    left_hip = [int(results.pose_landmarks.landmark[23].x * width),
+                     int(results.pose_landmarks.landmark[23].y * height)]
+    left_knee = [int(results.pose_landmarks.landmark[25].x * width),
+                  int(results.pose_landmarks.landmark[25].y * height)]
+    left_ankle = [int(results.pose_landmarks.landmark[27].x * width),
+                  int(results.pose_landmarks.landmark[27].y * height)]
 
-    return calculate_angle(left_shoulder, left_elbow, left_wrist)
+    threading.Thread(target=draw_left_leg, args=(results, image,)).start()
+
+    return calculate_angle(left_hip, left_knee, left_ankle)
 
 
 '''---------------------------- FINALIZA: CALCULANDO LOS ANGULOS NECESARIOS ---------------------------------------------------'''
@@ -360,24 +352,24 @@ def text_to_speech(feedback):
 
 
 #Ejercicio de la sentadilla
-def leftArm(results, image):
+def leftLeg(results, image):
     #Ingresando al global stage para modificarlo
     global stage, counter, time_exercise, wrong_counter
 
     #Verificando que se vean los puntos del brazo
-    if (results.pose_landmarks.landmark[13].visibility > 0.90 and results.pose_landmarks.landmark[15].visibility > 0.90):
-        left_arm_angle = leftArmAngle(results, image,)
+    if (results.pose_landmarks.landmark[25].visibility > 0.90 and results.pose_landmarks.landmark[27].visibility > 0.90):
+        left_leg_angle = leftLegAngle(results, image,)
         print('EL ANGULO ES: --------')
-        print(left_arm_angle)
+        print(left_leg_angle)
 
         #HILO: Creando el draw bar
 
-        threading.Thread(target=draw_cv2_bar, args=(left_arm_angle,image,)).start()
+        threading.Thread(target=draw_cv2_bar, args=(left_leg_angle,160,90,image,)).start()
 
-        if left_arm_angle > 160:
+        if left_leg_angle > 160:
             stage = "inicial"
 
-        if left_arm_angle > 80 and left_arm_angle < 90 and stage == "inicial":
+        if left_leg_angle > 80 and left_leg_angle < 90 and stage == "inicial":
 
             if time_exercise<1.8:
                 stage = 'final'
@@ -398,9 +390,9 @@ def leftArm(results, image):
             threading.Thread(target=thread_timer, args=()).start()
 
 
-        elif left_arm_angle < 70 and stage == "inicial":
+        elif left_leg_angle < 70 and stage == "inicial":
             stage = "final"
-            feedback = "Estas flexionando mucho tu brazo"
+            feedback = "Estas flexionando mucho la pierna"
             wrong_counter = wrong_counter + 1
             #Informando del error de flexion
             threading.Thread(target=draw_cv2_error_flexion, args=(feedback, image,)).start()
@@ -409,7 +401,7 @@ def leftArm(results, image):
         print(left_arm_angle)'''
 
     else:
-        feedback = 'NO SE VE TU BRAZO'
+        feedback = 'NO SE VE TU PIERNA'
         #HILO: Creando el hilo que indica si se ven los puntos necesarios para el analisis
         threading.Thread(target=draw_cv2_error, args=(feedback, image,)).start()
 
@@ -443,7 +435,7 @@ def leftArm(results, image):
 
 
 '''++++++++++++++++++++++++++++++++++++ OBTENIENDO EL PROCESAMIENTO DE POSES ++++++++++++++++++++++++++++++++++++++++++++++'''
-def pose_estimation_flexion_codo(image, amount, serie):
+def pose_estimation_sentadilla(image, amount, serie):
     #Obteniendo las variables globales
     global counter, exercise_serie, mp_pose, mp_drawing
     #Variable resultados
@@ -453,10 +445,9 @@ def pose_estimation_flexion_codo(image, amount, serie):
         try:
             #Obteniendo el result pose
             results = poseProcess(image)
-            landmarks = results.pose_landmarks.landmark
-
-            #Ingresando al target que hara el calculo de angulos corporales
-            threading.Thread(target=leftArm, args=(results, image), kwargs={}).start()
+            if results.pose_landmarks is not None:
+                #Ingresando al target que hara el calculo de angulos corporales
+                threading.Thread(target=leftLeg, args=(results, image), kwargs={}).start()
 
 
         except:

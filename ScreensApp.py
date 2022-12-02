@@ -1,3 +1,5 @@
+from kivy.uix.dropdown import DropDown
+from kivy.uix.floatlayout import FloatLayout
 from kivymd.app import MDApp
 from kivy.lang.builder import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
@@ -12,29 +14,61 @@ from kivy.uix.layout import  Layout
 from kivy.uix.image import Image, AsyncImage
 from kivy.uix.button import Button
 from kivy.graphics.texture import Texture
+from kivy.uix.dropdown import DropDown
 import cv2
 from kivy.properties import StringProperty
 import threading
 from functools import partial
-import sys
-import mediapipe as mp
-
 '''Importando el modulo para que ejercicio se esta llamando'''
 import CaseExercise as caseExercise
-
+import CameraChoose as cameraChoose
 #import other kivy stuff
 from kivy.clock import Clock
+from kivy.uix.popup import Popup
 
 
 usernameglobal = ''
 #Guardando el token en una variable para luego realizar las peticiones
 token = ''
 #El ejercicio a realizar
-ejercicio = 'Flexion codo'
+ejercicio = 'Sentadilla'
 tipo = 'fortalecimiento'
-parte = 'superior'
+parte = 'inferior'
 amount = 2
 serie = 1
+
+'''------ Creando el Pop-Up -------'''
+class PopUpCamera(FloatLayout):
+    def on_enter(self):
+        listCameras = cameraChoose.returnCameraIndexes()
+        print(f"LISTA DE CAMARAS {listCameras}")
+
+        self.dropDown = DropDown()
+        for camera in listCameras:
+            print(f"CAMARA {camera}")
+            self.button = Button(
+                background_color=(255, 255, 255, 0),
+                # on_press = lambda x, item=element: print("\nitem number\n", item),
+                text=f'CAMARA {camera}',
+                size_hint_y=None,
+                height=50
+            )
+
+            # Ingresando al dropdown
+            self.dropDown.add_widget(self.button)
+        popUpCamera = self.ids.popUpCamera
+        popUpCamera.add_widget(self.dropDown)
+
+    def click(self, item):
+        print('holi')
+
+
+
+
+
+
+
+
 class MenuScreen(Screen):
 
     '''def update_info(self, username, password):
@@ -197,7 +231,7 @@ class ListExerciseScreen(Screen):
 
                 self.mdcard = MDCard(
                     size_hint= (.6, .6),
-                    pos_hint= {'center_x': .5, 'center_y': .40}
+                    pos_hint= {"center_x": .5, "center_y": .5}
                 )
                 #Ingresando la el boton dentro de la imagen y la imagen dentro del card
                 #luego agregando el card al carousel
@@ -210,15 +244,59 @@ class ListExerciseScreen(Screen):
         else:
             print('Hubo problemas en la autenticacion')
 
+
     def click(self, item):
         global parte, tipo, ejercicio
         parte = item['ejercicioId']['parteCuerpo']
         tipo = item['ejercicioId']['tipo']
         ejercicio = item['ejercicioId']['nombre']
-
-        MDApp.get_running_app().root.current = 'video'
-
         print(item['ejercicioId']['nombre'])
+
+
+
+
+        self.show = PopUpCamera()
+        listCameras = cameraChoose.returnCameraIndexes()
+        print(f"LISTA DE CAMARAS {listCameras}")
+        self.dropDown = DropDown(
+            pos_hint={'center_x': 0.5, 'center_y': 0.8}
+        )
+        for camera in listCameras:
+            print(f"CAMARA {camera}")
+            self.button = Button(
+                background_color=(255, 0, 255, 0),
+                on_press = lambda x, item = camera: self.click_Camera(item),
+                text=f'CAMARA {camera}',
+                size_hint_y=None,
+                height=50
+            )
+
+            # Ingresando al dropdown
+            self.dropDown.add_widget(self.button)
+        self.show.add_widget(self.dropDown)
+
+
+
+
+        popupWindow = Popup(title='Escoge una camara', content=self.show, size_hint=(None, None), size=(400,400))
+        popupWindow.open()
+
+        '''MDApp.get_running_app().root.current = 'video'''
+
+
+
+    def change_Camera(self, item):
+        self.image = Image(
+            size_hint= (1, 0.9),
+            allow_stretch = True,
+            keep_ratio = True,
+            post_hint = {'center_x': 0.5, 'top': 1}
+        )
+        self.show.add_widget(self.image)
+
+
+    def click_Camera(self, item):
+        print(item)
 
 
 
@@ -229,6 +307,7 @@ sm = ScreenManager()
 sm.add_widget(MenuScreen(name='menu'))
 sm.add_widget(VideoScreen(name='video'))
 sm.add_widget(ListExerciseScreen(name='listExercise'))
+
 
 
 class DemoApp(MDApp):
