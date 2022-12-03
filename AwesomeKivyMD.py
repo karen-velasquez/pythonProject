@@ -3,7 +3,7 @@ import matplotlib
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 import mplcyberpunk
-
+import numpy as np
 matplotlib.style.use("cyberpunk")
 
 import pandas as pd
@@ -54,7 +54,8 @@ def plot():
     fig = Figure(figsize=(6, 6), dpi=100)
     plot1 = fig.add_subplot(111)
     plot1.plot(df['Duration'], df['Discount'], marker='o')
-    plot1.fill_between(df['Duration'], df['Discount'], color='lightblue', alpha=0.5)
+
+    plot1.fill_between(df['Duration'], np.ones(len(df['Duration']))*50, color='red', alpha=0.3)
 
     canvas = FigureCanvasTkAgg(fig, master=window)
     canvas.draw()

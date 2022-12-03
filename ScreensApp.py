@@ -26,6 +26,13 @@ import CameraChoose as cameraChoose
 from kivy.clock import Clock
 from kivy.uix.popup import Popup
 
+import tkinter
+window = tkinter.Tk()
+window.title("GUI")
+
+
+
+
 
 usernameglobal = ''
 #Guardando el token en una variable para luego realizar las peticiones
@@ -73,6 +80,14 @@ class MenuScreen(Screen):
 
     '''def update_info(self, username, password):
             self.token = '''
+
+    def prob_tkinter(self):
+        tkinter.Label(window, text="Username").grid(row=0)
+        tkinter.Entry(window).grid(row=0, column=1)
+        tkinter.Label(window, text="Password").grid(row=1)
+        tkinter.Entry(window).grid(row=1, column=1)
+        tkinter.Checkbutton(window, text="Keep Me Logged In").grid(columnspan=2)
+        window.mainloop()
 
     def login(self, username, password):
         print('el print')
