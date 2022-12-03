@@ -27,8 +27,13 @@ class AppAPIRequest():
         global listaEjercicios
         #Imprimiendo el token
         print(token)
+
         #Imprimiendo la lista de ejercicios
         listaEjercicios = request.APIRequest.listarAsignados(self, token, username, endpoint)
+        print(" QUE TIPO DE VALOR ES: ")
+        print(type(listaEjercicios))
+        print(" Y LOS VALORES ")
+        print(listaEjercicios)
         return listaEjercicios
 
 
