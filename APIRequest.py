@@ -48,6 +48,20 @@ class APIRequest():
 
 
 
+
+    def crearGraficoPromedios(self, token):
+        pass
+
+
+
+
+
+
+
+
+
+
+
 '''def main():
     apiRequest = APIRequest()
     apiRequest.gettoken("karen123","123")

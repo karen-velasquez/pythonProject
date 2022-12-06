@@ -1,4 +1,4 @@
-from kivy.app import App
+'''from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.boxlayout import BoxLayout
 
@@ -70,4 +70,124 @@ class TestApp(App):
         return Test()
 
 if __name__ == '__main__':
-    TestApp().run()
+    TestApp().run()'''
+
+'''import cv2
+from datetime import datetime
+
+# the duration (in seconds)
+duration = 5
+cap = cv2.VideoCapture(1 + cv2.CAP_DSHOW)
+print(cv2.CAP_DSHOW)
+print(cap)
+qu = 0
+while True:
+
+    ret, frame = cap.read()
+    start_time = datetime.now()
+    diff = (datetime.now() - start_time).seconds  # converting into seconds
+    while (diff <= duration):
+        ret, frame = cap.read()
+        cv2.putText(frame, str(diff), (70, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2,
+                    cv2.LINE_AA)  # adding timer text
+        cv2.imshow('frame', frame)
+        diff = (datetime.now() - start_time).seconds
+
+
+
+
+        k = cv2.waitKey(10)
+        if k & 0xFF == ord("r"):  # reset the timer
+            break
+        if k & 0xFF == ord("q"):  # quit all
+            qu = 1
+            break
+
+    if qu == 1:
+        break
+
+cap.release()
+cv2.destroyAllWindows()
+'''
+
+
+import cv2
+import sys
+from datetime import datetime
+
+# Initialize variables
+camSource = 1
+running = True
+saveCount = 0
+nSecond = 0
+totalSec = 3
+strSec = '321'
+keyPressTime = 0.0
+startTime = 0.0
+timeElapsed = 0.0
+startCounter = False
+endCounter = False
+
+# Start the camera
+camObj = cv2.VideoCapture(camSource)
+if not camObj.isOpened():
+    sys.exit('Camera did not provide frame.')
+
+frameWidth = 800
+frameHeight = 800
+
+# Start video stream
+while running:
+    readOK, frame = camObj.read()
+
+    # Display counter on screen before saving a frame
+    if startCounter:
+        if nSecond < totalSec:
+            # draw the Nth second on each frame
+            cv2.putText(img = frame,
+                        text = strSec[nSecond],
+                        org = (int(frameWidth/2 - 20),int(frameHeight/2)),
+                        fontFace = cv2.FONT_HERSHEY_DUPLEX,
+                        fontScale = 6,
+                        color = (255,255,255),
+                        thickness = 5)
+
+            timeElapsed = (datetime.now() - startTime).total_seconds()
+#            print 'timeElapsed: {}'.format(timeElapsed)
+
+            if timeElapsed >= 1:
+                nSecond += 1
+#                print 'nthSec:{}'.format(nSecond)
+                timeElapsed = 0
+                startTime = datetime.now()
+            print("TIME ELAPSED "+str(nSecond))
+
+        else:
+            cv2.imwrite('img' + str(saveCount) + '.jpg', frame)
+#            print 'saveTime: {}'.format(datetime.now() - keyPressTime)
+            saveCount += 1
+            startCounter = False
+            nSecond = 1
+
+    # Get user input
+    keyPressed = cv2.waitKey(3)
+    if keyPressed == ord('s'):
+        startCounter = True
+        startTime = datetime.now()
+        keyPressTime = datetime.now()
+#        print 'startTime: {}'.format(startTime)
+#        print 'keyPressTime: {}'.format(keyPressTime)
+
+    elif keyPressed == ord('q'):
+        # Quit the while loop
+        running = False
+        cv2.destroyAllWindows()
+
+    # Show video stream in a window
+    cv2.imshow('video', frame)
+
+camObj.release()
+
+
+
+

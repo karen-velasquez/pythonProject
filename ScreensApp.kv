@@ -105,8 +105,9 @@ ScreenManager:
                     size: self.size
                     pos: self.pos
 
-            on_press: root.prob_tkinter()
             on_press: root.login(loginusername.text, loginpassword.text)
+
+
 
 
 
@@ -138,52 +139,174 @@ ScreenManager:
             on_release: root.stop_vid()
 
 
+
+
+
+
+
+
 <ListExerciseScreen>:
     name: 'listExercise'
-    MDBoxLayout:
-        orientation: "vertical"
 
+    BoxLayout:
+        orientation: 'vertical'
         MDTopAppBar:
             title: "Sistema de Seguimiento"
             use_overflow: True
-            right_action_items:
-                [
-                ["home", lambda x: app.callback(x), "Home"],
-                ["message-star", lambda x: app.callback(x), "Message star"],
-                ["message-question", lambda x: app.callback(x), "Message question"],
-                ["message-reply", lambda x: app.callback(x), "Message reply"],
-                ]
+            md_bg_color: 0, 0.6, 0.9, 1
+            spacing: 10
 
-        MDLabel:
-            font_name: "styles/Poppins-SemiBold.ttf"
-            font_size: "40sp"
-            theme_text_color: "Custom"
-            text_color: 60/255, 43/255, 117/255, 1
-            text: 'Ejercicios Asignados'
-            halign: 'center'
-            size_hint_y: None
-            pos_hint: {"center_x": .5, "center_y": .9}
+        BoxLayout:
+            id: top_box
+            orientation: "horizontal"
+            spacing: 10
 
-        MDLabel:
-            adaptive_size: True
-            height: "20sp"
-            pos_hint: {"center_x": .5, "center_y": .2}
-            size_hint_y: None
-            text: 'Realiza los ejercicios asignados\n\n constantemente para una buena recuperacion !!!!'
-            halign: 'center'
+            BoxLayout:
+                padding: 8
+                spacing: 20
+                width: 350
+                id: bottom_box
+                orientation: 'vertical'
+                size_hint_x: None
 
 
-        Carousel:
-            id: carousel
-            pos_hint: {"center_x": .5, "center_y": .5}
+                MDLabel:
+                    text: "Menú"
+                    padding: "4dp", "4dp"
+                    font_name: "styles/Poppins-SemiBold.ttf"
+                    font_size: "20sp"
+                    theme_text_color: "Custom"
+                    halign: "center"
+                    adaptive_height: True
+                    canvas.before:
+                        Color:
+                            rgb: (255/255, 255/255, 255/255, 1)
+                        RoundedRectangle:
+                            size: self.size
+                            pos: self.pos
 
 
-        MDRectangleFlatButton:
-            text: 'Back'
-            pos_hint: {'center_x':0.5,'center_y':0.1}
-            on_press:
-                root.manager.transition.direction = 'left'
-                root.manager.current = 'menu'
+
+                Button:
+                    id: btn_camara
+                    font_name: "styles/Poppins-Regular.ttf"
+                    font_size: "20sp"
+                    background_color: 1,1,1,1
+                    theme_text_color: "Custom"
+                    text: 'Cámara'
+                    color: 1, 1, 1, 1
+                    size_hint_x: None
+                    size_hint_y: None
+                    width: 340
+                    height: 40
+                    on_press:
+                        self.background_color = (0.83, 0.84, 0.85, 1)
+                        root.btnCamara()
+                    on_release:
+                        self.background_color = (0.83, 0.84, 0.85, 1)
+                    canvas.before:
+                        RoundedRectangle:
+                            size: self.size
+                            pos: self.pos
+
+
+                Button:
+                    id: btn_informe
+                    font_name: "styles/Poppins-Regular.ttf"
+                    font_size: "20sp"
+                    background_color: 1,1,1,1
+                    text: 'Informe'
+                    color: 1,1,1,1
+                    size_hint_x: None
+                    size_hint_y: None
+                    width: 340
+                    height: 40
+                    on_press:
+                        self.background_color = (0.83, 0.84, 0.85, 1)
+                        root.btnInformeEjercicios()
+                    on_release:
+                        self.background_color = (0.83, 0.84, 0.85, 1)
+                    canvas.before:
+                        Color:
+                            rgb: (145/255, 216/255, 227/255, 1)
+                        RoundedRectangle:
+                            size: self.size
+                            pos: self.pos
+
+
+                Button:
+                    id: btn_informacion
+                    font_name: "styles/Poppins-Regular.ttf"
+                    font_size: "20sp"
+                    background_color: 1,1,1,1
+                    text: 'Extra'
+                    color: 1,1,1,1
+                    size_hint_x: None
+                    size_hint_y: None
+                    width: 340
+                    height: 40
+                    on_press:
+                        self.background_color = (0.83, 0.84, 0.85, 1)
+                        root.btnInformacion()
+                    on_release:
+                        self.background_color = (0.83, 0.84, 0.85, 1)
+                    canvas.before:
+                        Color:
+                            rgb: (145/255, 216/255, 227/255, 1)
+                        RoundedRectangle:
+                            size: self.size
+                            pos: self.pos
+                Widget:
+
+
+
+
+
+
+            MDBoxLayout:
+                orientation: "vertical"
+                size_hint_x: None
+                width: top_box.width - bottom_box.width - 50
+                canvas.before:
+                    RoundedRectangle:
+                        size: self.size
+                        pos: self.pos
+                        source: 'images/backgroundBlueMore.jpg'
+
+                MDLabel:
+                    font_name: "styles/Poppins-SemiBold.ttf"
+                    font_size: "40sp"
+                    theme_text_color: "Custom"
+                    text_color: 60/255, 43/255, 117/255, 1
+                    text: 'Ejercicios Asignados'
+                    halign: 'center'
+                    size_hint_y: None
+                    pos_hint: {"center_x": .5, "center_y": .9}
+
+                MDLabel:
+                    adaptive_size: True
+                    height: "20sp"
+                    pos_hint: {"center_x": .5, "center_y": .2}
+                    size_hint_y: None
+                    text: 'Realiza los ejercicios asignados\n\n constantemente para una buena recuperacion !!!!'
+                    halign: 'center'
+
+
+                Carousel:
+                    id: carousel
+                    pos_hint: {"center_x": .5, "center_y": .5}
+
+
+                MDRectangleFlatButton:
+                    text: 'Back'
+                    pos_hint: {'center_x':0.5,'center_y':0.1}
+                    on_press:
+                        root.manager.transition.direction = 'left'
+                        root.manager.current = 'menu'
+
+
+
+
 
 
 
