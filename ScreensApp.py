@@ -5,6 +5,8 @@ from kivy.lang.builder import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivymd.uix.button import MDRectangleFlatButton
 from kivymd.uix.card import MDCard
+import threading
+import json
 
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.label import Label
@@ -31,10 +33,11 @@ import CameraChoose as cameraChoose
 #import other kivy stuff
 from kivy.clock import Clock
 from kivy.uix.popup import Popup
-
+from datetime import date
 
 ''' Librerias para el informa de Matplolib '''
 import ModuleMatplotlib as moduleMatplotlib
+import time
 
 '''----------------------------'''
 
@@ -47,6 +50,11 @@ tipo = 'fortalecimiento'
 parte = 'superior'
 amount = 2
 serie = 1
+asignadoChoose = {}
+
+#La variable global de la camara
+camera = 1
+data_map = {}
 
 
 
@@ -191,12 +199,14 @@ class PopUpDescripcion(Popup):
 
 
 
-
-
-
-
-
 '''--------------------------- FINALIZA: AQUI SE CONFIGURA UN MENSAJE DE ALERTA PARA EL INGRESO -------------------------------------------------------'''
+
+
+
+
+
+
+
 
 
 
@@ -239,12 +249,13 @@ class PopUpCamera(Popup):
 
         # *********************************** Creando el boxlayout de la Imagen ****************************
         boxLayoutImage = BoxLayout(size_hint_x = .7 , orientation = 'vertical')
-        imageVideo = Image(
+
+
+        self.imageVideo = Image(
             size_hint = (1 , 1),
-            allow_stretch = True,  # allow the video image to be scaled
-            source= "images/logo_fisio.jpg"
+            allow_stretch = True # allow the video image to be scaled
         )
-        boxLayoutImage.add_widget(imageVideo)
+        boxLayoutImage.add_widget(self.imageVideo)
         boxLayoutContent.add_widget(boxLayoutImage)
 
         boxlayoutContentComplete.add_widget(boxLayoutContent)
@@ -271,15 +282,57 @@ class PopUpCamera(Popup):
         # Dandole la funcion de salir del pop up
         ok_button.bind(on_press=self.clickVideoClose)
         self.popup.open()
+        threading.Thread(target=self.runThreadCamera, daemon=True).start()
 
 
 
+    #Cuando se escoja una de las camaras aqui se mostrara el codigo
     def click_camera(self, item):
-        print(f"Este es el item: {item}")
+        global camera
+        camera = item
+        # stop the video capture loop
+        self.stopThreadCamera()
+        if (self.cameraFlag == False):
+            threading.Thread(target=self.runThreadCamera, daemon=True).start()
+            print(f"Este es el item: {camera}")
 
+
+    #funcion la correr la camara desde un hilo
+    def runThreadCamera(self):
+        global camera
+        # this code is run in a separate thread
+        self.cameraFlag = True  # flag to stop loop
+        cam = cv2.VideoCapture(camera)
+        # start processing loop
+        while (self.cameraFlag):
+            ret, frame = cam.read()
+            Clock.schedule_once(partial(self.displayFrameThreadCamera, frame))
+        cam.release()
+        cv2.destroyAllWindows()
+
+    def displayFrameThreadCamera(self, frame, dt):
+        # display the current video frame in the kivy Image widget
+        # create a Texture the correct size and format for the frame
+        texture = Texture.create(size=(frame.shape[1], frame.shape[0]), colorfmt='bgr')
+        # copy the frame data into the texture
+        texture.blit_buffer(frame.tobytes(order=None), colorfmt='bgr', bufferfmt='ubyte')
+        # flip the texture (otherwise the video is upside down
+        texture.flip_vertical()
+        # actually put the texture in the kivy Image widget
+        self.imageVideo.texture = texture
+
+    def stopThreadCamera(self):
+        # stop the video capture loop
+        self.cameraFlag = False
+        time.sleep(1)
+
+
+    #Cerrando el popUp
     def clickVideoClose(self, instance):
+        self.stopThreadCamera()
         self.popup.dismiss(self)
-        print("holiiiiiiiiiiiiiii ")
+
+
 '''---------------------------------------- FINALIZA: Creando el Pop-Up de la Camara ------------------------------------------------------'''
 
 
@@ -368,15 +421,16 @@ class VideoScreen(Screen):
             threading.Thread(target=self.doInferiorFort, daemon=True).start()
 
     def doSuperiorFort(self, *args):
+        global camera
         # this code is run in a separate thread
         self.do_vid = True  # flag to stop loop
-        self.cam = cv2.VideoCapture(1)
+        self.cam = cv2.VideoCapture(camera)
 
         while (self.do_vid):
-            global ejercicio, serie, amount
+            global ejercicio, serie, amount, asignadoChoose, data_map
             ret, frame = self.cam.read()
 
-            frame = caseExercise.switch_superior_fortalecimiento(frame, ejercicio, amount, serie)
+            frame = caseExercise.switch_superior_fortalecimiento(frame, ejercicio, amount, serie, asignadoChoose, data_map )
             # the partial function just says to call the specified method with the provided argument (Clock adds a time argument)
             Clock.schedule_once(partial(self.display_frame, frame))
 
@@ -465,16 +519,24 @@ class VideoScreen(Screen):
 '''---------------------------------- AQUI SE CONFIGURA LA PANTALLA DONDE SE ENCUENTRA LA LISTA DE EJERCICIOS -----------------------------------------'''
 class ListExerciseScreen(Screen):
 
+
+
     #*********************************** Al ingresar se carga la lista de ejercicios del usuario******************************************
     def on_enter(self):
         global usernameglobal, token
+
+        #Eliminando el carousel
+        '''self.removeAllCarousel()'''
+
+        #oBTENIENDO LA LISTA DE EJERCICIOS
         listaEjercicios = function.AppAPIRequest.calllist(self, token, usernameglobal)
+        print("HOLA SI HAY DATOS")
+        print(listaEjercicios)
         # verificando que la lista este llena
         if listaEjercicios != 500 and listaEjercicios != 0 and listaEjercicios != '':
             for element in listaEjercicios:  # iteramos sobre data
                 print("----------------------- ELEMENTO ------------------------------------")
                 print(element)
-
                 #icon = AsyncImage(source=str(element['ejercicioId']['linkImagenFinal']))
                 self.button = Button(
                     background_color= (255, 255, 255, 0),
@@ -497,24 +559,66 @@ class ListExerciseScreen(Screen):
                 #luego agregando el card al carousel
                 self.asyncImage.add_widget(self.button)
                 self.mdcard.add_widget(self.asyncImage)
-                carousel = self.ids.carousel
+
+
+                #Obteniendo el box layout e incorporando el carousel
+                carousel=self.ids.carousel
                 carousel.add_widget(self.mdcard)
 
 
         else:
             print('Hubo problemas en la autenticacion')
 
+    def removeCarousel(self):
+        #Limpiando el carousel
+        self.ids.carousel.clear_widgets()
+
     # *********************************** Al hacer click en uno de los ejercicios de carousel ******************************************
     def click(self, itemEjercicio):
-        global parte, tipo, ejercicio
+        global parte, tipo, ejercicio, asignadoChoose, amount, serie, data_map
         parte = itemEjercicio['ejercicioId']['parteCuerpo']
         tipo = itemEjercicio['ejercicioId']['tipo']
         ejercicio = itemEjercicio['ejercicioId']['nombre']
+        amount = int(itemEjercicio['repeticiones'])
+        serie = int(itemEjercicio['series'])
+
+
+
+        if(int(itemEjercicio['series'])==3):
+            data_map = {
+                '1': 0,
+                '2': 0,
+                '3': 0 }
+        elif(int(itemEjercicio['series'])==3):
+            data_map = {
+                '1': 0,
+                '2': 0,
+                '3': 0,
+                '4': 0}
+
+
+        #ejercicio, amount, serie, asignadoChoose
         print('--------------EL TIPO DE ITEM----------')
         print(itemEjercicio)
 
-        PopUpDescripcion(item = itemEjercicio)
-        '''MDApp.get_running_app().root.current = 'video'''
+        print(" EL USUARIO ES: ")
+        #Configurando el objeto para enviarlo
+        today = date.today()
+        json_data = {
+            'fechaCumplimiento':today.strftime("%Y-%m-%d"),
+            "asignadoId": {
+                "asignadoId": itemEjercicio['asignadoId']},
+            'aciertos': 0,
+            'serieRealizada': 3}
+        asignadoChoose = json_data
+
+        json_data.update({'aciertos': 80})
+        print(json_data)
+
+
+
+        #PopUpDescripcion(item = itemEjercicio)
+        MDApp.get_running_app().root.current = 'video'
 
 
 
@@ -566,6 +670,13 @@ class ListExerciseScreen(Screen):
     def btnCamara(self):
         PopUpCamera()
         pass
+
+
+
+
+
+
+
 
 
     def btnInformacion(self):

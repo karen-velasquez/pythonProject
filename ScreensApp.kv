@@ -74,21 +74,7 @@ ScreenManager:
 
 
 
-        Button:
-            text: 'EXERCISE'
-            font_name: "styles/Poppins-Regular.ttf"
-            font_size: "20sp"
-            size_hint: .5, .08
-            pos_hint: {'center_x':0.5,'center_y':0.22}
-            background_color: 0,0,0,0
-            canvas.before:
-                Color:
-                    rgb: (145/255, 216/255, 227/255, 1)
-                RoundedRectangle:
-                    size: self.size
-                    pos: self.pos
-            on_press:
-                root.manager.current = 'video'
+
 
 
         Button:
@@ -136,7 +122,9 @@ ScreenManager:
             pos_hint: {"x":0.4, "y":0.0}
             size_hint: .2, 0.1
             font_size: 20
-            on_release: root.stop_vid()
+            on_release:
+                root.stop_vid()
+                root.manager.current = 'listExercise'
 
 
 
@@ -264,6 +252,7 @@ ScreenManager:
 
 
             MDBoxLayout:
+                id: boxLayoutList
                 orientation: "vertical"
                 size_hint_x: None
                 width: top_box.width - bottom_box.width - 50
@@ -291,9 +280,8 @@ ScreenManager:
                     text: 'Realiza los ejercicios asignados\n\n constantemente para una buena recuperacion !!!!'
                     halign: 'center'
 
-
                 Carousel:
-                    id: carousel
+                    id:carousel
                     pos_hint: {"center_x": .5, "center_y": .5}
 
 
@@ -303,6 +291,14 @@ ScreenManager:
                     on_press:
                         root.manager.transition.direction = 'left'
                         root.manager.current = 'menu'
+                        root.removeCarousel()
+
+
+
+
+
+
+
 
 
 

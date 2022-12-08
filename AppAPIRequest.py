@@ -1,10 +1,10 @@
 from kivymd.app import MDApp
 import APIRequest as request
 
-endpoint = 'http://localhost:5000/'
+#endpoint = 'http://localhost:5000/'
 # Inicializando
-#endpoint = 'http://sistemafisioterapiabackend-env.eba-5tweru88.us-east-1.elasticbeanstalk.com/'
-
+endpoint = 'http://springbootbackend-env.eba-mmt3kmxg.us-east-1.elasticbeanstalk.com/'
+token = ''
 class AppAPIRequest():
 
     def __init__(self):
@@ -13,7 +13,7 @@ class AppAPIRequest():
     # Redireciona para o dashboard
     def calllogin(self, username, password):
         #Llamando el endpoint
-        global endpoint
+        global endpoint, token
         token = request.APIRequest.gettoken(self, username, password, endpoint)
         return token
 
@@ -31,9 +31,15 @@ class AppAPIRequest():
         return listaEjercicios
 
 
+def saveCumplimiento(cumplimientoAsignadoChoose):
+    global token, endpoint
+    cumplimientoObject = request.guardarCumplimiento(token, endpoint, cumplimientoAsignadoChoose)
+    return cumplimientoObject
 
-    def createPlotAverage(self, token):
-        pass
+
+
+
+
 
 
 

@@ -1,3 +1,5 @@
+import time
+
 import requests  #Importamos la librería requests
 
 
@@ -49,8 +51,24 @@ class APIRequest():
 
 
 
-    def crearGraficoPromedios(self, token):
-        pass
+def guardarCumplimiento(token, end_point, cumplimientoObject):
+    # definiendo el header
+    headers = {"Authorization": "Bearer " + str(token)}
+    print("llego aqui?---------------")
+    # creando el request
+    request = requests.post(str(end_point)+"cumplimiento/", headers=headers, json=cumplimientoObject)
+    #r = requests.post('http://httpbin.org/post', json={"key": "value"})
+    # obteniendo la data
+    data = request.json()
+    if (request.status_code == 200):
+        # Obteniendo el data del request
+        return data
+    else:
+        if (request.status_code == 500):
+            return 'Hubo un error al pedir los datos'
+        else:
+            if (request.status_code == 0):
+                return 'No hay conexion con el servidor'
 
 
 

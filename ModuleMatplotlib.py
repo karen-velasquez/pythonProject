@@ -11,7 +11,7 @@ import requests  #Importamos la librería requests
 import json
 
 #Este es el endpoint donde se realiza la consulta
-endpoint = 'http://localhost:5000/'
+endpoint = 'http://springbootbackend-env.eba-mmt3kmxg.us-east-1.elasticbeanstalk.com/'
 
 
 ''' ---------------------------------------- ANALIZANDO LA ENTRADA DE DATOS CON MATPLOLIB -----------------------------------------------------------'''
@@ -20,14 +20,12 @@ def order_data(json_str):
     #Leyendo los datos que son Json
     df = pd.read_json(json_str, orient='records')
     # Convirtiendo la fila del dataframe en fechas
-    df['Duration'] = pd.to_datetime(df['Duration'], format='%d-%m-%Y')
+    df['Duration'] = pd.to_datetime(df['Duration'], format='%Y-%m-%d')
     # Convirtiendo la fila a float
     df = df.astype({'Discount':'float'})
     #Ordenando los valores segun la fecha
     df = df.sort_values(by='Duration',ascending=True)
     column_headers = list(df.columns.values)
-    print("The Column Header :", column_headers)
-    '''df = df.set_index('Duration')'''
 
     return df
 
@@ -43,15 +41,13 @@ def order_data2():
     #Leyendo los datos que son Json
     df = pd.read_json(json_str, orient='records')
     # Convirtiendo la fila del dataframe en fechas
-    df['Duration'] = pd.to_datetime(df['Duration'], format='%d-%m-%Y')
+    df['Duration'] = pd.to_datetime(df['Duration'], format='%Y-%m-%d')
     # Convirtiendo la fila a float
     df = df.astype({'Discount':'float'})
     #Ordenando los valores segun la fecha
     df = df.sort_values(by='Duration',ascending=True)
 
     column_headers = list(df.columns.values)
-    print("The Column Header :", column_headers)
-    '''df = df.set_index('Duration')'''
 
     return df
 
@@ -63,8 +59,6 @@ def plot(json_str):
     window = Tk()
     df = order_data(json_str)
     df2= order_data2()
-    print('DATAFRAME')
-    print(df)
     #Creando la figura
     fig = Figure(figsize=(12, 7), dpi=100)
     plot1 = fig.add_subplot(111)
@@ -128,7 +122,6 @@ def plotEjercicios(usernameGlobal, token):
         legendsNames = []  # Opción 1
 
         for i in range(len(df)):
-            print(df.iloc[i]['CodigoAsignado'])
             '''----------------------------------------------- EL REQUEST ---------------------------------------------'''
             # creando el request
             requestCodigoAsignado = requests.get(
@@ -138,20 +131,16 @@ def plotEjercicios(usernameGlobal, token):
             dataCodigoAsignado = requestCodigoAsignado.json()
             if (requestCodigoAsignado.status_code == 200 and len(dataCodigoAsignado) > 0):
                 # Obteniendo el data del request
-                print(dataCodigoAsignado)
-                print(type(dataCodigoAsignado))
                 '''----------------------------------------------- EL REQUEST ---------------------------------------------'''
                 df2 = pd.read_json(json.dumps(dataCodigoAsignado), orient='records')
                 df2.columns = ['fechaCumplimiento', 'aciertos']
-                df2['fechaCumplimiento'] = pd.to_datetime(df2['fechaCumplimiento'], format='%d-%m-%Y')
+                df2['fechaCumplimiento'] = pd.to_datetime(df2['fechaCumplimiento'], format='%Y-%m-%d')
                 # Convirtiendo la fila a float
                 df2 = df2.astype({'aciertos': 'float'})
                 # Ordenando los valores segun la fecha
-                df2 = df2.sort_values(by='fechaCumplimiento', ascending=True)
+                '''df2 = df2.sort_values(by='fechaCumplimiento', ascending=True)'''
                 plt.plot(df2['fechaCumplimiento'], df2['aciertos'], marker='o')
                 legendsNames.append(df.iloc[i]['Nombre'])
-                print('Hola entre una vez')
-                print(df2)
             else:
                 if (requestCodigoAsignado.status_code == 500):
                     print('Hubo un error al pedir los datos')

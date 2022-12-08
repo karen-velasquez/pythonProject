@@ -6,6 +6,7 @@ import time
 from kivymd.app import MDApp
 import mediapipe as mp
 from datetime import datetime
+import AppAPIRequest as function
 
 # the duration (in seconds)
 duration = 5
@@ -19,13 +20,15 @@ camSource = 1
 running = True
 saveCount = 0
 nSecond = 0
-totalSec = 3
-strSec = '321'
+totalSec = 5
+strSec = '54321'
 keyPressTime = 0.0
-startTime = 0.0
+startTime = datetime.now()
 timeElapsed = 0.0
-startCounter = False
+startCounter = True
 endCounter = False
+cumplimientoObjectUpdate={}
+data_map_global ={}
 
 
 
@@ -64,6 +67,7 @@ se = 5
 
 dir = 0
 
+montoNecesario=0
 
 
 
@@ -422,7 +426,7 @@ def thread_timer(image):
     if startCounter:
         if nSecond < totalSec:
             # draw the Nth second on each frame
-            cv2.putText(image, strSec[nSecond], (300, 300), cv2.FONT_HERSHEY_SIMPLEX, 6, (255, 255, 255), 2,cv2.LINE_AA)  # adding timer text
+            cv2.putText(image, strSec[nSecond], (400, 400), cv2.FONT_HERSHEY_SIMPLEX, 6, (255, 255, 255), 2,cv2.LINE_AA)  # adding timer text
 
             time.sleep(1)
             timeElapsed = (datetime.now() - startTime).total_seconds()
@@ -430,10 +434,9 @@ def thread_timer(image):
 
             if timeElapsed >= 1:
                 nSecond += 1
-                #                print 'nthSec:{}'.format(nSecond)
                 timeElapsed = 0
                 startTime = datetime.now()
-            print("TIME ELAPSED " + str(nSecond))
+            #print("TIME ELAPSED " + str(nSecond))
 
         else:
             saveCount += 1
@@ -452,7 +455,6 @@ def thread_timer_prueba1(image, duration):
     time.sleep(5)
     print("End : %s" % time.ctime())'''
     sumatiempo = (datetime.now() - start_time).seconds  # converting into seconds
-    print(" HOLA ESTE ES EL DIFF "+str(diff))
     if (diff <= duration):
         cv2.putText(image, str(diff), (70, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2,
                     cv2.LINE_AA)  # adding timer text
@@ -491,17 +493,26 @@ def flexionCodo(results, image):
 
         threading.Thread(target=draw_cv2_bar, args=(left_arm_angle,160,90,image,)).start()
 
-        '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
+
+
+        #Si el angulo es mayor a 160 entonces se encuentra en la posicion inicial
+        if left_arm_angle > 160:
+            stage = "inicial"
+            print("INGRESE AL INICIAL")
+
+
+
+        '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
         global startCounter, nSecond, totalSec, diff, timeElapsed, saveCount
         global startTime, keyPressTime
         if stage == "inicial":
             if startCounter:
                 if nSecond < totalSec:
                     # draw the Nth second on each frame
-                    cv2.putText(image, strSec[nSecond], (300, 300), cv2.FONT_HERSHEY_SIMPLEX, 6, (255, 255, 255), 2,
+                    cv2.circle(image, (510, 420), 60, (255, 0, 0), -1)
+                    cv2.putText(image, strSec[nSecond], (480, 450), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 5,
                                 cv2.LINE_AA)  # adding timer text
 
-                    #time.sleep(1)
                     timeElapsed = (datetime.now() - startTime).total_seconds()
                     #            print 'timeElapsed: {}'.format(timeElapsed)
 
@@ -510,31 +521,35 @@ def flexionCodo(results, image):
                         #                print 'nthSec:{}'.format(nSecond)
                         timeElapsed = 0
                         startTime = datetime.now()
-                    print("TIME ELAPSED " + str(nSecond))
 
                 else:
                     saveCount += 1
                     startCounter = False
-                    nSecond = 1
-            '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
+                    nSecond = 0
+        '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
+        '''threading.Thread(target=thread_timer, args=(image,)).start()'''
+        #print("TIME ELAPSED " + str(nSecond))
 
 
-            '''threading.Thread(target=thread_timer, args=(image,)).start()'''
 
-
-
-        if left_arm_angle > 160:
-            stage = "inicial"
 
         if left_arm_angle > 80 and left_arm_angle < 90 and stage == "inicial":
-            if time_exercise<2.0:
+            if nSecond>0:
                 stage = 'final'
                 time_exercise = 0.0
                 wrong_counter = wrong_counter + 1
+                counter = counter + 1
                 feedback = 'muy rapido'
                 #HILO: Informando del error de tiempo : muy rapido!!!
-                #threading.Thread(target=text_to_speech, args=(feedback,)).start()
-                threading.Thread(target=draw_cv2_error_time, args=(feedback, image,)).start()
+                threading.Thread(target=text_to_speech, args=(feedback,)).start()
+                #threading.Thread(target=draw_cv2_error_time, args=(feedback, image,)).start()
+                #threading.Thread(target=draw_cv2_error_time, args=(feedback, image,)).start()
+                '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
+                startCounter = True
+                startTime = datetime.now()
+                nSecond = 0
+                '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
+
 
             else:
                 stage = "final"
@@ -548,6 +563,7 @@ def flexionCodo(results, image):
                 '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
                 startCounter = True
                 startTime = datetime.now()
+                nSecond = 0
                 '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
 
 
@@ -558,11 +574,14 @@ def flexionCodo(results, image):
             stage = "final"
             feedback = "Flexionas mucho tu brazo"
             wrong_counter = wrong_counter + 1
-
-            # HILO: Abriendo el hilo que mide el tiempo entre los contadores
-            '''threading.Thread(target=thread_timer, args=()).start()'''
             #Informando del error de flexion
             threading.Thread(target=text_to_speech, args=(feedback,)).start()
+            counter = counter + 1
+            '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
+            startCounter = True
+            startTime = datetime.now()
+            nSecond = 0
+            '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
             '''threading.Thread(target=draw_cv2_error_flexion, args=(feedback, image,)).start()'''
 
         '''print('\nlos otros angulos\n')
@@ -682,11 +701,15 @@ def flexionHombro(results, image):
 
 '''++++++++++++++++++++++++++++++++++++ OBTENIENDO EL PROCESAMIENTO DE POSES ++++++++++++++++++++++++++++++++++++++++++++++'''
 #------------------------------- FLEXION CODO ------------------------------------------
-def pose_estimation_flexion_codo(image, amount, serie):
+def pose_estimation_flexion_codo(image, amount, serie, asignadoChoose, data_map):
     #Obteniendo las variables globales
-    global counter, exercise_serie, mp_pose, mp_drawing
+    global counter, exercise_serie, mp_pose, mp_drawing, cumplimientoObjectUpdate, data_map_global, montoNecesario
+    data_map_global = data_map
+    cumplimientoObjectUpdate = asignadoChoose
+    montoNecesario = amount
+
     #Variable resultados
-    if counter<=amount and exercise_serie<=serie:
+    if counter<amount and exercise_serie<serie:
         # Extract landmarks
         try:
             # Obteniendo el result pose
@@ -704,6 +727,7 @@ def pose_estimation_flexion_codo(image, amount, serie):
         '''threading.Thread(target=draw_landmark, args=(results, mp_drawing, mp_pose, image,)).start()'''
 
     elif exercise_serie<serie:
+
         '''EN CASO DE QUE EL EJERCICIO HAYA CUMPLIDO CON EL CONTADOR PERO AUN NO CON LA SERIE'''
         #HILO: Contador hacia atras para descanso
         threading.Thread(target=time_counter, args=(image,)).start()
@@ -719,11 +743,14 @@ def pose_estimation_flexion_codo(image, amount, serie):
 
 
 # ----------------------------------- FLEXION DE HOMBRO HACIA ADELANTE ----------------------------
-def pose_estimation_flexion_hombro_adelante(image, amount, serie):
+def pose_estimation_flexion_hombro_adelante(image, amount, serie, asignadoChoose, data_map):
     #Obteniendo las variables globales
-    global counter, exercise_serie, mp_pose, mp_drawing
+    global counter, exercise_serie, mp_pose, mp_drawing, cumplimientoObjectUpdate, data_map_global, montoNecesario
+    data_map_global = data_map
+    cumplimientoObjectUpdate = asignadoChoose
+    montoNecesario = amount
     #Variable resultados
-    if counter<=amount and exercise_serie<=serie:
+    if counter<amount and exercise_serie<serie:
         # Extract landmarks
         try:
             #Obteniendo el result pose
@@ -759,21 +786,20 @@ def pose_estimation_flexion_hombro_adelante(image, amount, serie):
 
 
 # ----------------------------------- ABDUCCION HOMBRO LATERAL ----------------------------------
-def pose_estimation_abduccion_hombro_lateral(image, amount, serie):
+def pose_estimation_abduccion_hombro_lateral(image, amount, serie, asignadoChoose, data_map):
     #Obteniendo las variables globales
-    global counter, exercise_serie, mp_pose, mp_drawing
+    global counter, exercise_serie, mp_pose, mp_drawing, cumplimientoObjectUpdate, data_map_global, montoNecesario
+    data_map_global = data_map
+    cumplimientoObjectUpdate = asignadoChoose
+    montoNecesario = amount
     #Variable resultados
-    if counter<=amount and exercise_serie<=serie:
+    if counter<amount and exercise_serie<serie:
         # Extract landmarks
         try:
             #Obteniendo el result pose
             results = poseProcess(image)
 
             height, width, _ = image.shape
-            print('HOMBRO IZQUIERDO')
-            print(int(results.pose_landmarks.landmark[11].y * height))
-            print('HOMBRO DERECHO')
-            print(int(results.pose_landmarks.landmark[12].y * height))
 
 
             '''if results.pose_landmarks is not None:
@@ -823,15 +849,31 @@ def time_counter(image):
         '''Colocando un circulo en el centro que pinte el tiempo'''
         cv2.circle(image, (300,240), 150, (255,255,255), thickness=5, lineType=8, shift=0)
         cv2.putText(image, str(se),(260, 260),cv2.FONT_HERSHEY_SIMPLEX, 4, (255, 255, 255), 6, cv2.LINE_AA)
-        if ml == 60:
+        if ml == 50:
             ml = 0
             se = se - 1
             print(f'Tiempo segundos {se}')
     else:
-        counter = 0
-        se = 10
-        ml = 0
-        exercise_serie = exercise_serie + 1
+        if(counter>0):
+            global cumplimientoObjectUpdate, data_map_global, wrong_counter, montoNecesario
+            #Funcion para guardar
+            print("EL RESULTADO")
+
+            #result = function.saveCumplimiento(cumplimientoObjectUpdate)
+            counter = 0
+            se = 10
+            ml = 0
+            exercise_serie = exercise_serie + 1
+            data_map_global.update({str(exercise_serie): 50})
+            print("estoy acaaaaaaaaaaa!!!!")
+            print("wrong counter "+str(wrong_counter))
+            print("montonece" +str(montoNecesario))
+            cumplimientoObjectUpdate.update({'aciertos': ((1-(wrong_counter/montoNecesario))*100) })
+            result = function.saveCumplimiento(cumplimientoObjectUpdate)
+            wrong_counter = 0
+            print(data_map_global)
+            print("el actualizar")
+            print(result)
 
 
 '''---------------------- FINALIZA - UNA VEZ TERMINADA LA SESION CONTARA 30 SEGUNDOS PARA LA SGTE --------------------------'''
