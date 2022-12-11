@@ -72,11 +72,6 @@ ScreenManager:
                 font_name: "styles/Poppins-Regular.ttf"
                 font_size: "18sp"
 
-
-
-
-
-
         Button:
             text: 'Ingresar'
             font_name: "styles/Poppins-Regular.ttf"
@@ -86,15 +81,12 @@ ScreenManager:
             background_color: 0,0,0,0
             canvas.before:
                 Color:
-                    rgb: 145/255, 216/255, 227/255, 1
+                    rgb: (145/255, 216/255, 227/255, 1) if self.state=='normal' else (150/255, 216/255, 170/255, 1)
                 RoundedRectangle:
                     size: self.size
                     pos: self.pos
-
-            on_press: root.login(loginusername.text, loginpassword.text)
-
-
-
+            on_press:
+                root.login(loginusername.text, loginpassword.text)
 
 
 
@@ -129,10 +121,6 @@ ScreenManager:
 
 
 
-
-
-
-
 <ListExerciseScreen>:
     name: 'listExercise'
 
@@ -141,8 +129,9 @@ ScreenManager:
         MDTopAppBar:
             title: "Sistema de Seguimiento"
             use_overflow: True
-            md_bg_color: 0, 0.6, 0.9, 1
-            spacing: 10
+            md_bg_color: 0.09, 0.52, 0.62, 0.69
+
+            elevation: 0
 
         BoxLayout:
             id: top_box
@@ -156,7 +145,6 @@ ScreenManager:
                 id: bottom_box
                 orientation: 'vertical'
                 size_hint_x: None
-
 
                 MDLabel:
                     text: "Menú"
@@ -173,8 +161,6 @@ ScreenManager:
                             size: self.size
                             pos: self.pos
 
-
-
                 Button:
                     id: btn_camara
                     font_name: "styles/Poppins-Regular.ttf"
@@ -188,21 +174,19 @@ ScreenManager:
                     width: 340
                     height: 40
                     on_press:
-                        self.background_color = (0.83, 0.84, 0.85, 1)
                         root.btnCamara()
-                    on_release:
-                        self.background_color = (0.83, 0.84, 0.85, 1)
                     canvas.before:
+                        Color:
+                            rgba: (.4,.4,.4,1) if self.state=='normal' else (0,.7,.7,1)
                         RoundedRectangle:
                             size: self.size
                             pos: self.pos
-
 
                 Button:
                     id: btn_informe
                     font_name: "styles/Poppins-Regular.ttf"
                     font_size: "20sp"
-                    background_color: 1,1,1,1
+                    background_color: 0,0,0,0
                     text: 'Informe'
                     color: 1,1,1,1
                     size_hint_x: None
@@ -210,23 +194,19 @@ ScreenManager:
                     width: 340
                     height: 40
                     on_press:
-                        self.background_color = (0.83, 0.84, 0.85, 1)
                         root.btnInformeEjercicios()
-                    on_release:
-                        self.background_color = (0.83, 0.84, 0.85, 1)
                     canvas.before:
                         Color:
-                            rgb: (145/255, 216/255, 227/255, 1)
+                            rgba: (.4,.4,.4,1) if self.state=='normal' else (0,.7,.7,1)
                         RoundedRectangle:
                             size: self.size
                             pos: self.pos
-
 
                 Button:
                     id: btn_informacion
                     font_name: "styles/Poppins-Regular.ttf"
                     font_size: "20sp"
-                    background_color: 1,1,1,1
+                    background_color: 0,0,0,0
                     text: 'Extra'
                     color: 1,1,1,1
                     size_hint_x: None
@@ -234,21 +214,16 @@ ScreenManager:
                     width: 340
                     height: 40
                     on_press:
-                        self.background_color = (0.83, 0.84, 0.85, 1)
                         root.btnInformacion()
-                    on_release:
-                        self.background_color = (0.83, 0.84, 0.85, 1)
+
                     canvas.before:
                         Color:
-                            rgb: (145/255, 216/255, 227/255, 1)
+                            rgba: (.4,.4,.4,1) if self.state=='normal' else (0,.7,.7,1)
                         RoundedRectangle:
-                            size: self.size
                             pos: self.pos
+                            size: self.size
+
                 Widget:
-
-
-
-
 
 
             MDBoxLayout:
@@ -257,27 +232,31 @@ ScreenManager:
                 size_hint_x: None
                 width: top_box.width - bottom_box.width - 50
                 canvas.before:
+                    Color:
+                        rgb: (255/255, 255/255, 255/255, 1)
                     RoundedRectangle:
                         size: self.size
                         pos: self.pos
-                        source: 'images/backgroundBlueMore.jpg'
+                        source: 'images/bluelight30.png'
 
                 MDLabel:
                     font_name: "styles/Poppins-SemiBold.ttf"
-                    font_size: "40sp"
+                    font_size: "50sp"
                     theme_text_color: "Custom"
                     text_color: 60/255, 43/255, 117/255, 1
-                    text: 'Ejercicios Asignados'
+                    text: '\nEjercicios Asignados'
                     halign: 'center'
                     size_hint_y: None
                     pos_hint: {"center_x": .5, "center_y": .9}
 
                 MDLabel:
+                    font_name: "styles/Poppins-Regular.ttf"
                     adaptive_size: True
-                    height: "20sp"
+                    font_size: "20sp"
+                    height: "10sp"
                     pos_hint: {"center_x": .5, "center_y": .2}
                     size_hint_y: None
-                    text: 'Realiza los ejercicios asignados\n\n constantemente para una buena recuperacion !!!!'
+                    text: '\nRealiza los ejercicios asignados\nconstantemente para una buena recuperación !!!!'
                     halign: 'center'
 
                 Carousel:
@@ -285,22 +264,20 @@ ScreenManager:
                     pos_hint: {"center_x": .5, "center_y": .5}
 
 
-                MDRectangleFlatButton:
-                    text: 'Back'
-                    pos_hint: {'center_x':0.5,'center_y':0.1}
+                Button:
+                    size_hint: (.1, .2)
+                    pos_hint: {'center_y':0.1}
+                    background_color: 1, 1, 1, 0
                     on_press:
-                        root.manager.transition.direction = 'left'
+                        root.manager.transition.direction = 'right'
                         root.manager.current = 'menu'
                         root.removeCarousel()
-
-
-
-
-
-
-
-
-
+                    Image:
+                        source: "images/back.png"
+                        allow_stretch: True
+                        y: self.parent.y
+                        x: self.parent.x
+                        size: self.parent.size
 
 
 

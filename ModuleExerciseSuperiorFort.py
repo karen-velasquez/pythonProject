@@ -280,16 +280,6 @@ def draw_cv2_error_time(texto_error, image):
 
 
 
-'''FUNCION QUE DIBUJA LOS LANDMARKS'''
-def draw_landmark_2(results, mp_drawing, mp_pose, image ):
-    # Render detections
-    mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS,
-                                    mp_drawing.DrawingSpec(color=(245, 117, 66), thickness=2, circle_radius=2),
-                                    mp_drawing.DrawingSpec(color=(245, 66, 230), thickness=2, circle_radius=2))
-
-
-
-
 '''---------------------------- FINALIZA: DIBUJANDO LOS ERRORES ---------------------------------------------------'''
 
 
@@ -299,43 +289,30 @@ def draw_landmark_2(results, mp_drawing, mp_pose, image ):
 
 '''---------------------------- DIBUJANDO EL BAR ---------------------------------------------------'''
 '''FUNCION QUE DIBUJA SOBRE EL CV2'''
-def draw_cv2_bar(angle, max, min, image):
+def draw_cv2_bar(angle, maxAngle, minAngle, minLimit, maxLimit, image):
     #Obteniendo los valores globales
     global count, dir, stage
     # Check for the dumbbell curls
     color = (255, 0, 255)
     if stage == 'inicial':
         color = (255,255,255)
-        # angle = detector.findAngle(img, 11, 13, 15,False)
-        '''per = np.interp(angle, (170, 90), (0, 100))
-        bar = np.interp(angle, (170, 90), (650, 100))'''
-
         #valor del bar
-        bar = np.interp(angle, (min, max), (400, 150))
-
-
-        #print('ES EL BAR')
-        #print(bar)
-        # print(angle, per)
+        bar = np.interp(angle, (minAngle, maxAngle), (minLimit, maxLimit))
 
         # Draw Bar
         #Rectangulo general
         cv2.rectangle(image, (120, 150), (160, 400), color, 3)
         #Llenando el rectangulo
         cv2.rectangle(image, (120, int(bar)), (160, 400), color, cv2.FILLED)
+        # Aumentando un texto que le diga que inicie
+        cv2.putText(image, 'INICIA!!!', (100, 450), cv2.FONT_HERSHEY_SIMPLEX,
+                            1, color, 2, cv2.LINE_AA)
 
     else:
         # Draw Bar
         cv2.rectangle(image, (120, 150), (160, 400), color, 3)
 
 
-
-def draw_performance_bar(self, img, per, bar, color, count):
-    cv2.rectangle(img, (1600, 100), (1675, 650), color, 3)
-    cv2.rectangle(img, (1600, int(bar)), (1675, 650), color, cv2.FILLED)
-    cv2.putText(
-        img, f"{int(per)} %", (1600, 75), cv2.FONT_HERSHEY_PLAIN, 4, color, 4
-    )
 
 
 
@@ -420,58 +397,6 @@ def text_to_speech(feedback):
     engine.runAndWait()
 
 
-def thread_timer(image):
-    global startCounter, nSecond, totalSec, diff, startTime, timeElapsed, saveCount
-
-    if startCounter:
-        if nSecond < totalSec:
-            # draw the Nth second on each frame
-            cv2.putText(image, strSec[nSecond], (400, 400), cv2.FONT_HERSHEY_SIMPLEX, 6, (255, 255, 255), 2,cv2.LINE_AA)  # adding timer text
-
-            time.sleep(1)
-            timeElapsed = (datetime.now() - startTime).total_seconds()
-            #            print 'timeElapsed: {}'.format(timeElapsed)
-
-            if timeElapsed >= 1:
-                nSecond += 1
-                timeElapsed = 0
-                startTime = datetime.now()
-            #print("TIME ELAPSED " + str(nSecond))
-
-        else:
-            saveCount += 1
-            startCounter = False
-            nSecond = 1
-
-
-
-def thread_timer_prueba1(image, duration):
-    global diff
-    #Esto obtiene la hora actual
-    start_time = datetime.now()
-    #Esto obtiene un segundo
-    time.sleep(60)
-    '''print("Start : %s" % time.ctime())
-    time.sleep(5)
-    print("End : %s" % time.ctime())'''
-    sumatiempo = (datetime.now() - start_time).seconds  # converting into seconds
-    if (diff <= duration):
-        cv2.putText(image, str(diff), (70, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2,
-                    cv2.LINE_AA)  # adding timer text
-        cv2.imshow('frame', image)
-        diff = diff + sumatiempo
-
-
-
-def thread_timer_mantener_extra():
-    global time_exercise
-    # EL LOOP
-    start_time1 = time.process_time()
-    time.sleep(2)
-    end_time1 = time.process_time()
-    time_exercise = end_time1 - start_time1
-
-    print("The time spent in thread is {}".format(end_time1 - start_time1))
 '''-------------------------- FINALIZA: ESTOS SON LOS EXTRAS  -----------------------------------------'''
 
 
@@ -491,16 +416,11 @@ def flexionCodo(results, image):
         print(left_arm_angle)'''
         #HILO: Creando el draw bar
 
-        threading.Thread(target=draw_cv2_bar, args=(left_arm_angle,160,90,image,)).start()
-
-
+        threading.Thread(target=draw_cv2_bar, args=(left_arm_angle,160,90,150,400,image,)).start()
 
         #Si el angulo es mayor a 160 entonces se encuentra en la posicion inicial
         if left_arm_angle > 160:
             stage = "inicial"
-            print("INGRESE AL INICIAL")
-
-
 
         '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
         global startCounter, nSecond, totalSec, diff, timeElapsed, saveCount
@@ -527,11 +447,6 @@ def flexionCodo(results, image):
                     startCounter = False
                     nSecond = 0
         '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
-        '''threading.Thread(target=thread_timer, args=(image,)).start()'''
-        #print("TIME ELAPSED " + str(nSecond))
-
-
-
 
         if left_arm_angle > 80 and left_arm_angle < 90 and stage == "inicial":
             if nSecond>0:
@@ -558,7 +473,6 @@ def flexionCodo(results, image):
                 #HILO: Contabilizando la cantidad de repeticiones
                 threading.Thread(target=text_to_speech, args=(counter,)).start()
                 # HILO: Abriendo el hilo que mide el tiempo entre los contadores
-                '''threading.Thread(target=thread_timer, args=()).start()'''
 
                 '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
                 startCounter = True
@@ -566,10 +480,7 @@ def flexionCodo(results, image):
                 nSecond = 0
                 '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
 
-
-
-
-        elif left_arm_angle < 70 and stage == "inicial":
+        elif left_arm_angle < 70 and stage != "" and stage!="final":
             draw_cv2_error_counter = 20
             stage = "final"
             feedback = "Flexionas mucho tu brazo"
@@ -584,14 +495,11 @@ def flexionCodo(results, image):
             '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
             '''threading.Thread(target=draw_cv2_error_flexion, args=(feedback, image,)).start()'''
 
-        '''print('\nlos otros angulos\n')
-        print(left_arm_angle)'''
 
     else:
         feedback = '  NO SE VE\n  TU BRAZO'
         #HILO: Creando el hilo que indica si se ven los puntos necesarios para el analisis
         threading.Thread(target=draw_cv2_error, args=(feedback, image,)).start()
-
 
 
 
@@ -611,7 +519,7 @@ def flexionHombro(results, image):
         print(left_arm_hip_angle)'''
 
         #HILO: Creando el draw bar
-        threading.Thread(target=draw_cv2_bar, args=(left_arm_hip_angle,85,10,image,)).start()
+        threading.Thread(target=draw_cv2_bar, args=(left_arm_hip_angle,85,10,400, 150,image,)).start()
 
         if left_arm_hip_angle < 15:
             stage = "inicial"
@@ -635,7 +543,7 @@ def flexionHombro(results, image):
                     threading.Thread(target=text_to_speech, args=(counter,)).start()
 
                 #HILO: Abriendo el hilo que mide el tiempo entre los contadores
-                threading.Thread(target=thread_timer, args=()).start()
+                #threading.Thread(target=thread_timer, args=()).start()
 
 
             elif left_arm_hip_angle > 85 and stage == "inicial":
@@ -673,16 +581,6 @@ def flexionHombro(results, image):
 
 
 '''---------------------------- FINALIZA: FEEDBACK DE LOS EJERCICIOS - FORTALECIMIENTO - TREN INFERIOR ---------------------------------------------------'''
-
-
-
-
-
-
-
-
-
-
 
 
 

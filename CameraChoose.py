@@ -1,5 +1,7 @@
 import cv2
 
+
+#Obteniendo los indexes de las camaras activas
 def returnCameraIndexes():
     # checks the first 10 indexes.
     index = 0
@@ -12,7 +14,6 @@ def returnCameraIndexes():
             cap.release()
         index += 1
         i -= 1
-    print(arr)
     return arr
 
 

@@ -1,9 +1,9 @@
 from kivymd.app import MDApp
 import APIRequest as request
 
-#endpoint = 'http://localhost:5000/'
+endpoint = 'http://localhost:5000/'
 # Inicializando
-endpoint = 'http://springbootbackend-env.eba-mmt3kmxg.us-east-1.elasticbeanstalk.com/'
+#endpoint = 'http://springbootbackend-env.eba-mmt3kmxg.us-east-1.elasticbeanstalk.com/'
 token = ''
 class AppAPIRequest():
 
