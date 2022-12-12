@@ -28,7 +28,6 @@ timeElapsed = 0.0
 startCounter = True
 endCounter = False
 cumplimientoObjectUpdate={}
-data_map_global ={}
 
 
 
@@ -49,6 +48,7 @@ pose_model = mp_pose.Pose(
 '''--------------------------VARIABLES GLOBALES---------------------------'''
 #Esto vera el estado si es down o up
 stage = ''
+stagetwo = ''
 
 #Esto contara todas las repeticiones del ejercicio
 counter = 0
@@ -64,8 +64,8 @@ time_exercise = 3.5
 #Tiempo entre sesiones-----------
 ml = 0
 se = 5
-
 dir = 0
+
 
 montoNecesario=0
 
@@ -149,6 +149,7 @@ def draw_landmark(results, mp_drawing, mp_pose, image ):
 
 #Dibujando solo los puntos y lineas del brazo
 def draw_left_arm(results, image):
+    global stage, stagetwo
     height, width, _ = image.shape
     x1 = int(results.pose_landmarks.landmark[11].x * width)
     y1 = int(results.pose_landmarks.landmark[11].y * height)
@@ -164,9 +165,18 @@ def draw_left_arm(results, image):
         # Confirgurando el color de la linea
         color_line = (255, 255, 255)
         color_circle = (255, 255, 255)
-    else:
+
+    elif stage == "final" and stagetwo == "inter":
+        color_line = (0, 255, 0)
+        color_circle = (0, 255, 0)
+
+    elif stage == "final" and stagetwo == "final":
         color_line = (0, 0, 255)
         color_circle = (0, 0, 255)
+
+    else:
+        color_line = (255, 0, 0)
+        color_circle = (255, 0, 0)
 
     cv2.line(image, (x1, y1), (x2, y2), color_line, 3)
     cv2.line(image, (x3, y3), (x2, y2), color_line, 3)
@@ -246,35 +256,8 @@ def draw_cv2_error(texto_error, image):
 
 
 
-'''FUNCION QUE DIBUJA SOBRE EL CV2'''
-draw_cv2_error_counter = 0
-def draw_cv2_error_flexion(texto_error, image):
-    global draw_cv2_error_counter
-    print("ENTRE AL DRAW CV2_ ERROR")
-    print(draw_cv2_error_counter)
-    while(draw_cv2_error_counter>0):
-        cv2.rectangle(image, (100, 200), (600, 400), (245, 117, 16), -1)
-        # Rep data
-        cv2.putText(image, texto_error, (120, 270),
-                            cv2.FONT_HERSHEY_SIMPLEX, 1.4, (255, 255, 255), 3, cv2.LINE_AA)
-        time.sleep(1)
-        draw_cv2_error_counter = draw_cv2_error_counter - 1
-        print('EL COUNTER')
-        print(draw_cv2_error_counter)
 
 
-'''FUNCION QUE DIBUJA SOBRE EL CV2'''
-def draw_cv2_error_time(texto_error, image):
-    duration = 10
-    # HILO: Abriendo el hilo que mide el tiempo entre los contadores
-    diff = 0
-    while (diff <= duration):
-        cv2.rectangle(image, (100, 200), (600, 400), (245, 117, 16), -1)
-        # Rep data
-        cv2.putText(image, texto_error, (120, 270),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1.4, (255, 255, 255), 3, cv2.LINE_AA)
-        diff=diff+1
-        time.sleep(0.5)
 
 
 
@@ -294,6 +277,9 @@ def draw_cv2_bar(angle, maxAngle, minAngle, minLimit, maxLimit, image):
     global count, dir, stage
     # Check for the dumbbell curls
     color = (255, 0, 255)
+
+
+
     if stage == 'inicial':
         color = (255,255,255)
         #valor del bar
@@ -308,11 +294,17 @@ def draw_cv2_bar(angle, maxAngle, minAngle, minLimit, maxLimit, image):
         cv2.putText(image, 'INICIA!!!', (100, 450), cv2.FONT_HERSHEY_SIMPLEX,
                             1, color, 2, cv2.LINE_AA)
 
-    else:
-        # Draw Bar
+    elif stage == "final" and stagetwo == "inter":
+        color = (0, 255, 0)
         cv2.rectangle(image, (120, 150), (160, 400), color, 3)
 
+    elif stage == "final" and stagetwo == "final":
+        color= (0, 0, 255)
+        cv2.rectangle(image, (120, 150), (160, 400), color, 3)
 
+    else:
+        color = (255, 0, 0)
+        cv2.rectangle(image, (120, 150), (160, 400), color, 3)
 
 
 
@@ -407,7 +399,7 @@ def text_to_speech(feedback):
 #Ejercicio de flexion de codo
 def flexionCodo(results, image):
     #Ingresando al global stage para modificarlo
-    global stage, counter, time_exercise, wrong_counter, draw_cv2_error_counter
+    global stage, stagetwo, counter, time_exercise, wrong_counter
 
     #Verificando que se vean los puntos del brazo
     if (results.pose_landmarks.landmark[13].visibility > 0.90 and results.pose_landmarks.landmark[15].visibility > 0.90):
@@ -451,27 +443,28 @@ def flexionCodo(results, image):
         if left_arm_angle > 80 and left_arm_angle < 90 and stage == "inicial":
             if nSecond>0:
                 stage = 'final'
+                stagetwo = 'final'
                 time_exercise = 0.0
                 wrong_counter = wrong_counter + 1
                 counter = counter + 1
                 feedback = 'muy rapido'
                 #HILO: Informando del error de tiempo : muy rapido!!!
                 threading.Thread(target=text_to_speech, args=(feedback,)).start()
-                #threading.Thread(target=draw_cv2_error_time, args=(feedback, image,)).start()
-                #threading.Thread(target=draw_cv2_error_time, args=(feedback, image,)).start()
+
+
                 '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
                 startCounter = True
                 startTime = datetime.now()
                 nSecond = 0
                 '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
 
-
             else:
                 stage = "final"
+                stagetwo = 'inter'
                 counter = counter + 1
                 print(time_exercise)
                 #HILO: Contabilizando la cantidad de repeticiones
-                threading.Thread(target=text_to_speech, args=(counter,)).start()
+                #threading.Thread(target=text_to_speech, args=(counter,)).start()
                 # HILO: Abriendo el hilo que mide el tiempo entre los contadores
 
                 '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
@@ -480,20 +473,18 @@ def flexionCodo(results, image):
                 nSecond = 0
                 '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
 
-        elif left_arm_angle < 70 and stage != "" and stage!="final":
-            draw_cv2_error_counter = 20
+        elif left_arm_angle < 70 and stagetwo=="inter":
             stage = "final"
+            stagetwo = "final"
             feedback = "Flexionas mucho tu brazo"
             wrong_counter = wrong_counter + 1
             #Informando del error de flexion
             threading.Thread(target=text_to_speech, args=(feedback,)).start()
-            counter = counter + 1
+            #counter = counter + 1
             '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
             startCounter = True
             startTime = datetime.now()
             nSecond = 0
-            '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
-            '''threading.Thread(target=draw_cv2_error_flexion, args=(feedback, image,)).start()'''
 
 
     else:
@@ -533,7 +524,7 @@ def flexionHombro(results, image):
                     wrong_counter = wrong_counter + 1
                     feedback = 'Hazlo mas lento!!!'
                     #HILO: Informando del error de tiempo : muy rapido!!!
-                    threading.Thread(target=draw_cv2_error_time, args=(feedback, image,)).start()
+
 
                 else:
                     stage = "final"
@@ -543,7 +534,6 @@ def flexionHombro(results, image):
                     threading.Thread(target=text_to_speech, args=(counter,)).start()
 
                 #HILO: Abriendo el hilo que mide el tiempo entre los contadores
-                #threading.Thread(target=thread_timer, args=()).start()
 
 
             elif left_arm_hip_angle > 85 and stage == "inicial":
@@ -599,10 +589,9 @@ def flexionHombro(results, image):
 
 '''++++++++++++++++++++++++++++++++++++ OBTENIENDO EL PROCESAMIENTO DE POSES ++++++++++++++++++++++++++++++++++++++++++++++'''
 #------------------------------- FLEXION CODO ------------------------------------------
-def pose_estimation_flexion_codo(image, amount, serie, asignadoChoose, data_map):
+def pose_estimation_flexion_codo(image, amount, serie, asignadoChoose):
     #Obteniendo las variables globales
-    global counter, exercise_serie, mp_pose, mp_drawing, cumplimientoObjectUpdate, data_map_global, montoNecesario
-    data_map_global = data_map
+    global counter, exercise_serie, mp_pose, mp_drawing, cumplimientoObjectUpdate, montoNecesario
     cumplimientoObjectUpdate = asignadoChoose
     montoNecesario = amount
 
@@ -641,10 +630,10 @@ def pose_estimation_flexion_codo(image, amount, serie, asignadoChoose, data_map)
 
 
 # ----------------------------------- FLEXION DE HOMBRO HACIA ADELANTE ----------------------------
-def pose_estimation_flexion_hombro_adelante(image, amount, serie, asignadoChoose, data_map):
+def pose_estimation_flexion_hombro_adelante(image, amount, serie, asignadoChoose):
     #Obteniendo las variables globales
-    global counter, exercise_serie, mp_pose, mp_drawing, cumplimientoObjectUpdate, data_map_global, montoNecesario
-    data_map_global = data_map
+    global counter, exercise_serie, mp_pose, mp_drawing, cumplimientoObjectUpdate, montoNecesario
+
     cumplimientoObjectUpdate = asignadoChoose
     montoNecesario = amount
     #Variable resultados
@@ -684,10 +673,9 @@ def pose_estimation_flexion_hombro_adelante(image, amount, serie, asignadoChoose
 
 
 # ----------------------------------- ABDUCCION HOMBRO LATERAL ----------------------------------
-def pose_estimation_abduccion_hombro_lateral(image, amount, serie, asignadoChoose, data_map):
+def pose_estimation_abduccion_hombro_lateral(image, amount, serie, asignadoChoose):
     #Obteniendo las variables globales
-    global counter, exercise_serie, mp_pose, mp_drawing, cumplimientoObjectUpdate, data_map_global, montoNecesario
-    data_map_global = data_map
+    global counter, exercise_serie, mp_pose, mp_drawing, cumplimientoObjectUpdate, montoNecesario
     cumplimientoObjectUpdate = asignadoChoose
     montoNecesario = amount
     #Variable resultados
@@ -753,7 +741,7 @@ def time_counter(image):
             print(f'Tiempo segundos {se}')
     else:
         if(counter>0):
-            global cumplimientoObjectUpdate, data_map_global, wrong_counter, montoNecesario
+            global cumplimientoObjectUpdate, wrong_counter, montoNecesario
             #Funcion para guardar
             print("EL RESULTADO")
 
@@ -762,14 +750,12 @@ def time_counter(image):
             se = 10
             ml = 0
             exercise_serie = exercise_serie + 1
-            data_map_global.update({str(exercise_serie): 50})
             print("estoy acaaaaaaaaaaa!!!!")
             print("wrong counter "+str(wrong_counter))
             print("montonece" +str(montoNecesario))
             cumplimientoObjectUpdate.update({'aciertos': ((1-(wrong_counter/montoNecesario))*100) })
             result = function.saveCumplimiento(cumplimientoObjectUpdate)
             wrong_counter = 0
-            print(data_map_global)
             print("el actualizar")
             print(result)
 

@@ -1,3 +1,4 @@
+import time
 from tkinter import *
 import matplotlib
 from matplotlib.figure import Figure
@@ -176,6 +177,7 @@ def plotEjercicios(usernameGlobal, token):
     '''plot_button = Button(master=window, command=plot, height=2, width=10, text="Plot")
     plot_button.pack()'''
     window.mainloop()
+    time.sleep(1)
 
 
 

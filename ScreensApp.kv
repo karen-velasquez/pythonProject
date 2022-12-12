@@ -72,19 +72,15 @@ ScreenManager:
                 font_name: "styles/Poppins-Regular.ttf"
                 font_size: "18sp"
 
-        Button:
+        MDRoundFlatButton:
             text: 'Ingresar'
             font_name: "styles/Poppins-Regular.ttf"
             font_size: "20sp"
             size_hint: .5, .08
             pos_hint: {'center_x':0.5,'center_y':0.12}
-            background_color: 0,0,0,0
-            canvas.before:
-                Color:
-                    rgb: (145/255, 216/255, 227/255, 1) if self.state=='normal' else (150/255, 216/255, 170/255, 1)
-                RoundedRectangle:
-                    size: self.size
-                    pos: self.pos
+            md_bg_color:(0.05, 0.32, 0.42, 0.78)
+            text_color:"white"
+            line_color: 0, 0, 0, 0
             on_press:
                 root.login(loginusername.text, loginpassword.text)
 
@@ -109,8 +105,15 @@ ScreenManager:
             keep_ratio: True  # keep the aspect ratio so people don't look squashed
             pos_hint: {'center_x':0.5, 'top':1}
 
-        Button:
-            text: 'Stop Video'
+        MDRoundFlatIconButton:
+            text: 'VOLVER'
+            icon_color: "white"
+            icon: "arrow-left-circle"
+            font_size: "20sp"
+            md_bg_color:(0.2, 0.28, 0.34, 0.78)
+            font_name:"styles/Poppins-Regular.ttf"
+            text_color:"white"
+            theme_text_color: "Custom"
             pos_hint: {"x":0.4, "y":0.0}
             size_hint: .2, 0.1
             font_size: 20
@@ -161,67 +164,51 @@ ScreenManager:
                             size: self.size
                             pos: self.pos
 
-                Button:
+                MDRoundFlatIconButton:
                     id: btn_camara
-                    font_name: "styles/Poppins-Regular.ttf"
+                    icon: "camera-flip"
+                    icon_color: "white"
                     font_size: "20sp"
-                    background_color: 1,1,1,1
+                    md_bg_color:(0.2, 0.28, 0.34, 0.78)
+                    font_name:"styles/Poppins-Regular.ttf"
+                    text_color:"white"
                     theme_text_color: "Custom"
-                    text: 'Cámara'
-                    color: 1, 1, 1, 1
-                    size_hint_x: None
+                    text: '  Cámara'
+                    size_hint_x: 1
                     size_hint_y: None
-                    width: 340
-                    height: 40
                     on_press:
                         root.btnCamara()
-                    canvas.before:
-                        Color:
-                            rgba: (.4,.4,.4,1) if self.state=='normal' else (0,.7,.7,1)
-                        RoundedRectangle:
-                            size: self.size
-                            pos: self.pos
 
-                Button:
+
+                MDRoundFlatIconButton:
                     id: btn_informe
-                    font_name: "styles/Poppins-Regular.ttf"
                     font_size: "20sp"
-                    background_color: 0,0,0,0
-                    text: 'Informe'
-                    color: 1,1,1,1
-                    size_hint_x: None
+                    icon: "chart-line"
+                    icon_color: "white"
+                    md_bg_color:(0.2, 0.28, 0.34, 0.78)
+                    font_name:"styles/Poppins-Regular.ttf"
+                    text_color:"white"
+                    text: '  Informe'
+                    size_hint_x: 1
                     size_hint_y: None
-                    width: 340
-                    height: 40
                     on_press:
                         root.btnInformeEjercicios()
-                    canvas.before:
-                        Color:
-                            rgba: (.4,.4,.4,1) if self.state=='normal' else (0,.7,.7,1)
-                        RoundedRectangle:
-                            size: self.size
-                            pos: self.pos
 
-                Button:
+
+                MDRoundFlatIconButton:
                     id: btn_informacion
-                    font_name: "styles/Poppins-Regular.ttf"
                     font_size: "20sp"
-                    background_color: 0,0,0,0
-                    text: 'Extra'
-                    color: 1,1,1,1
-                    size_hint_x: None
+                    icon: "help-circle"
+                    icon_color: "white"
+                    md_bg_color:(0.2, 0.28, 0.34, 0.78)
+                    font_name:"styles/Poppins-Regular.ttf"
+                    text_color:"white"
+                    text: '  Extra'
+                    size_hint_x: 1
                     size_hint_y: None
-                    width: 340
-                    height: 40
                     on_press:
                         root.btnInformacion()
 
-                    canvas.before:
-                        Color:
-                            rgba: (.4,.4,.4,1) if self.state=='normal' else (0,.7,.7,1)
-                        RoundedRectangle:
-                            pos: self.pos
-                            size: self.size
 
                 Widget:
 

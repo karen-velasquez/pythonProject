@@ -56,7 +56,6 @@ asignadoChoose = {}
 
 #La variable global de la camara
 camera = 2
-data_map = {}
 
 
 
@@ -213,7 +212,13 @@ class PopUpCamera(Popup):
         boxlayoutContentComplete.add_widget(boxLayoutContent)
 
         # *********************************** Creando el boton del salida ****************************
-        ok_button = MDRoundFlatButton(text='Ok', size_hint=(0.5, None), size=(Window.width / 8, Window.height / 15),pos_hint= {'center_x':0.5, 'center_y':0.5})
+        ok_button = MDRoundFlatButton(text='Ok',
+                                      size_hint=(0.5, None),
+                                      size=(Window.width / 8, Window.height / 15),
+                                      md_bg_color=(0, 0.12, 0.14, 0.69),
+                                      font_name="styles/Poppins-SemiBold.ttf",
+                                      text_color="white",
+                                      pos_hint= {'center_x':0.5, 'center_y':0.5})
         boxlayoutContentComplete.add_widget(ok_button)
 
         # ***********************************Adicionando el Boxlayout Content Complete al PopUp ****************************
@@ -221,13 +226,13 @@ class PopUpCamera(Popup):
 
         # *********************************** Creando el Pop Up ****************************
         self.popup = Popup(
-            title='ESCOGE UNA DE LAS CAMARAS',
+            title='ESCOGE UNA DE LAS CÁMARAS',
             content=content,
             size_hint=(None, None),
             title_color = (0,0,0,1),
             title_font = "styles/Poppins-Regular.ttf",
             title_size = '30sp',
-            size=(Window.width / 2, Window.height / 2),
+            size=(Window.width / 3, Window.height / 2),
             auto_dismiss=False,
             background="images/lightBlue.jpg"
         )
@@ -240,6 +245,7 @@ class PopUpCamera(Popup):
 
     #Cuando se escoja una de las camaras aqui se mostrara el codigo
     def click_camera(self, item):
+        time.sleep(0.5)
         global camera
         camera = item
         # stop the video capture loop
@@ -279,7 +285,7 @@ class PopUpCamera(Popup):
     def stopThreadCamera(self):
         # stop the video capture loop
         self.cameraFlag = False
-        time.sleep(1)
+        time.sleep(0.5)
 
 
     #Cerrando el popUp
@@ -366,18 +372,14 @@ class VideoScreen(Screen):
     def on_enter(self):
         #en este treading hacer lo del switch tambie, osea que al escoger tren inferior o algo active el threading de
         # self.parte inferior fortalecimiento o algo asi
-        if parte == 'superior' and tipo == 'elongacion':
-            threading.Thread(target=self.doSuperiorElong, daemon=True).start()
-
-        elif parte == 'superior' and tipo == 'fortalecimiento':
+        if parte == 'superior' and tipo == 'fortalecimiento':
             threading.Thread(target=self.doSuperiorFort, daemon=True).start()
-
-        elif parte == 'inferior' and tipo == 'elongacion':
-            threading.Thread(target=self.doInferiorLong, daemon=True).start()
 
         elif parte == 'inferior' and tipo == 'fortalecimiento':
             threading.Thread(target=self.doInferiorFort, daemon=True).start()
 
+
+    #En caso de que el ejercicio escogido sea del Tren superior y de Fortalecimiento
     def doSuperiorFort(self, *args):
         global camera
         # this code is run in a separate thread
@@ -385,10 +387,10 @@ class VideoScreen(Screen):
         self.cam = cv2.VideoCapture(camera)
 
         while (self.do_vid):
-            global ejercicio, serie, amount, asignadoChoose, data_map
+            global ejercicio, serie, amount, asignadoChoose
             ret, frame = self.cam.read()
 
-            frame = caseExercise.switch_superior_fortalecimiento(frame, ejercicio, amount, serie, asignadoChoose, data_map )
+            frame = caseExercise.switch_superior_fortalecimiento(frame, ejercicio, amount, serie, asignadoChoose)
             # the partial function just says to call the specified method with the provided argument (Clock adds a time argument)
             Clock.schedule_once(partial(self.display_frame, frame))
 
@@ -397,51 +399,18 @@ class VideoScreen(Screen):
         self.cam.release()
         cv2.destroyAllWindows()
 
-    def doSuperiorElong(self, *args):
-        # this code is run in a separate thread
-        self.do_vid = True  # flag to stop loop
-        self.cam = cv2.VideoCapture(1)
-
-        while (self.do_vid):
-            global ejercicio, serie, amount
-            ret, frame = self.cam.read()
-
-            frame = caseExercise.switch_superior_elongacion(frame, ejercicio, amount, serie)
-            # the partial function just says to call the specified method with the provided argument (Clock adds a time argument)
-            Clock.schedule_once(partial(self.display_frame, frame))
-
-            #cv2.imshow('Hidden', frame)
-            #cv2.waitKey(1)
-        self.cam.release()
-        cv2.destroyAllWindows()
-
+    # En caso de que el ejercicio escogido sea del Tren inferior y de Fortalecimiento
     def doInferiorFort(self, *args):
+        global camera
         # this code is run in a separate thread
         self.do_vid = True  # flag to stop loop
-        self.cam = cv2.VideoCapture(1)
+        self.cam = cv2.VideoCapture(camera)
 
         while (self.do_vid):
             global ejercicio, serie, amount
             ret, frame = self.cam.read()
 
             frame = caseExercise.switch_inferior_fortalecimiento(frame, ejercicio, amount, serie)
-            # the partial function just says to call the specified method with the provided argument (Clock adds a time argument)
-            Clock.schedule_once(partial(self.display_frame, frame))
-
-            #cv2.imshow('Hidden', frame)
-            #cv2.waitKey(1)
-        self.cam.release()
-        cv2.destroyAllWindows()
-
-    def doInferiorLong(self, *args):
-        # this code is run in a separate thread
-        self.do_vid = True  # flag to stop loop
-        self.cam = cv2.VideoCapture(1)
-        while (self.do_vid):
-            global ejercicio, serie, amount
-            ret, frame = self.cam.read()
-
-            frame = caseExercise.switch_inferior_elongacion(frame, ejercicio, amount, serie)
             # the partial function just says to call the specified method with the provided argument (Clock adds a time argument)
             Clock.schedule_once(partial(self.display_frame, frame))
 
@@ -576,31 +545,13 @@ class ListExerciseScreen(Screen):
 
     # *********************************** Al hacer click en uno de los ejercicios de carousel ******************************************
     def click(self, itemEjercicio):
-        global parte, tipo, ejercicio, asignadoChoose, amount, serie, data_map
+        global parte, tipo, ejercicio, asignadoChoose, amount, serie
         parte = itemEjercicio['ejercicioId']['parteCuerpo']
         tipo = itemEjercicio['ejercicioId']['tipo']
         ejercicio = itemEjercicio['ejercicioId']['nombre']
         amount = int(itemEjercicio['repeticiones'])
         serie = int(itemEjercicio['series'])
 
-        if(int(itemEjercicio['series'])==3):
-            data_map = {
-                '1': 0,
-                '2': 0,
-                '3': 0 }
-        elif(int(itemEjercicio['series'])==3):
-            data_map = {
-                '1': 0,
-                '2': 0,
-                '3': 0,
-                '4': 0}
-
-
-        #ejercicio, amount, serie, asignadoChoose
-        print('--------------EL TIPO DE ITEM----------')
-        print(itemEjercicio)
-
-        print(" EL USUARIO ES: ")
         #Configurando el objeto de Cumplimiento para enviarlo
         #Llamando la fechad de hoy
         today = date.today()
@@ -613,24 +564,25 @@ class ListExerciseScreen(Screen):
         asignadoChoose = json_data
         #Finaliza: Configurando el objeto de Cumplimiento para enviarlo
 
-
         #PopUpDescripcion(item = itemEjercicio)
         MDApp.get_running_app().root.current = 'video'
 
 
 
     # ************************************* FUNCIONES DE LOS BOTONES *********************************************************
-    def change_Camera(self, item):
-        self.image = Image(
-            size_hint= (1, 0.9),
-            allow_stretch = True,
-            keep_ratio = True,
-            post_hint = {'center_x': 0.5, 'top': 1}
-        )
-        self.show.add_widget(self.image)
+    #+++++++++++++++++++++++++++++++++ CAMERA +++++++++++++++++++++++++++
+    def btnCamara(self):
+        #Creando un hilo que abrirá la cámara
+
+        self.crearPopUpCamera()
+
+    def crearPopUpCamera(self):
+        PopUpCamera()
 
 
 
+
+    # +++++++++++++++++++++++++++++++++ INFORME +++++++++++++++++++++++++++
     #Cuando se hace click en el informe de ejercicios
     def btnInformeEjercicios(self):
         #Creando un hilo que cree el grafico
@@ -642,12 +594,8 @@ class ListExerciseScreen(Screen):
         moduleMatplotlib.plotEjercicios(usernameglobal, token)
 
 
-    #El boton de Camera
-    def btnCamara(self):
-        #Creando un hilo que abrirá la cámara
-        PopUpCamera()
 
-
+    # +++++++++++++++++++++++++++++++++ EXTRA INFORMATION +++++++++++++++++++++++++++
     def btnInformacion(self):
         pass
 
