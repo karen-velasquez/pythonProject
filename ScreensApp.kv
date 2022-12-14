@@ -101,6 +101,7 @@ ScreenManager:
             # the id allows easy access
             id: vid
             size_hint: 1, 0.9
+            source: 'images/exercise.png'
             allow_stretch: True  # allow the video image to be scaled
             keep_ratio: True  # keep the aspect ratio so people don't look squashed
             pos_hint: {'center_x':0.5, 'top':1}
@@ -258,7 +259,6 @@ ScreenManager:
                     on_press:
                         root.manager.transition.direction = 'right'
                         root.manager.current = 'menu'
-                        root.removeCarousel()
                     Image:
                         source: "images/back.png"
                         allow_stretch: True

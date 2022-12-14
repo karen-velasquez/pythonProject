@@ -1,9 +1,8 @@
-
 import ModuleExerciseSuperiorFort as moduleExerciseSuperiorFort
-import ModuleExerciseSuperiorElong as moduleExerciseSuperiorElong
 import ModuleExerciseInferiorFort as moduleExerciseInferiorFort
-import ModuleExerciseInferiorElong as moduleExerciseInferiorElong
 
+def returnValues():
+    moduleExerciseSuperiorFort.returnValuesOriginal()
 
 
 '''------------------- EN CASO DE QUE EL EJERCICIO SEA DE LA PARTE INFERIOR-----------------------'''

@@ -1,28 +1,20 @@
-from tkinter import Canvas
-
-from kivy.uix.dropdown import DropDown
-from kivy.uix.floatlayout import FloatLayout
+import kivy
 from kivymd.app import MDApp
 from kivy.lang.builder import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivymd.uix.button import MDRectangleFlatButton, MDRoundFlatButton
 from kivymd.uix.card import MDCard
-import threading
-import json
-from kivy.graphics import Rectangle, Color
+
 
 from kivy.uix.anchorlayout import AnchorLayout
-from kivy.uix.label import Label
 from kivy.core.window import Window
 from kivy.uix.widget import Widget
 from kivymd.uix.label import MDLabel
 
 import AppAPIRequest as function
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.layout import Layout
 #import uix components
 from kivy.uix.image import Image, AsyncImage
-from kivy.uix.button import Button
 from kivy.graphics.texture import Texture
 from kivy.uix.carousel import Carousel
 
@@ -59,6 +51,102 @@ camera = 2
 
 
 
+
+'''--------------------------- AQUI SE CONFIGURA EL POPUP DE EXTRA -------------------------------------------------------'''
+class PopUpExtra(Popup):
+    def __init__(self):
+        super(PopUpExtra, self).__init__()
+
+        # Creando el Content que tendra el PopUp
+        content = AnchorLayout(anchor_x='center', anchor_y='bottom')
+
+        #Creando un box Layout que contenga a todos los layouts
+        boxlayoutContentComplete = BoxLayout(width=60, orientation='vertical')
+
+        # ****** Creando el carousel que tendra la informacion ***********
+        boxLayoutContentCarousel = BoxLayout(width=60, orientation='vertical',size=(Window.width / 1.1, Window.height / 1.1))
+        carousel = Carousel()
+
+        # ++++++++++++++++++++ Creando los cards de extras +++++++++++++++++++++++++
+        fotosIndicaciones = ['images/funcion1.png', 'images/funcion1_1.png', 'images/funcion2.png', 'images/funcion2_2.png']
+        for imagenIndicacion in fotosIndicaciones:
+            boxLayoutCardModuloDescription = BoxLayout(width=60, orientation='vertical',
+                                                       size=(Window.width / 1.1, Window.height / 1.1))
+
+            moduloDescriptionImage = AsyncImage(
+                source=imagenIndicacion,
+                width=80
+            )
+            boxLayoutCardModuloDescription.add_widget(moduloDescriptionImage)
+
+            moduloMdcard = MDCard(
+                size_hint=(0.7, 1),
+                width=50,
+                pos_hint={"center_x": .5, "center_y": .5},
+                md_bg_color="#eaf4f4"
+            )
+            # Ingresando la el boton dentro de la imagen y la imagen dentro del card
+            # luego agregando el card al carousel
+            moduloMdcard.add_widget(boxLayoutCardModuloDescription)
+            carousel.add_widget(moduloMdcard)
+            # ++++++++++++++++++++ Finaliza:   Creando el card de Informacion imagen de ejercicio +++++++++++++++++++++++++
+
+
+
+        # ++++++++++++++++++++ Finaliza: Creando el card de Informacion de ejercicio +++++++++++++++++++++++++
+
+        boxLayoutContentCarousel.add_widget(carousel)
+        boxlayoutContentComplete.add_widget(boxLayoutContentCarousel)
+        # ****** Finaliza: Creando el carousel que tendra la informacion ***********
+
+
+        # ++++++++++++++ Creando el boton de OK que lo ayudara a salir +++++++++++++
+        ok_button = MDRoundFlatButton(text='Ok',
+                                      size_hint=(0.5, None),
+                                      size=(Window.width / 8, Window.height / 15),
+                                      md_bg_color=(0, 0.12, 0.14, 0.69),
+                                      font_name="styles/Poppins-SemiBold.ttf",
+                                      text_color="white",
+                                      pos_hint={'center_x': 0.5, 'center_y': 0.5})
+
+        boxlayoutContentComplete.add_widget(ok_button)
+        # ++++++++++++++ Finaliza: Creando el boton de OK que lo ayudara a salir +++++++++++++
+
+        # ***********************************Adicionando el Boxlayout Content Complete al PopUp ****************************
+        content.add_widget(boxlayoutContentComplete)
+        # *********************************** Creando el Pop Up ****************************
+        self.popup = Popup(
+            title='DESCRIPCIÓN - DESLIZA -->',
+            content=content,
+            size_hint=(None, None),
+            title_color=(0, 0, 0, 1),
+            title_font="styles/Poppins-Regular.ttf",
+            title_size='20sp',
+            size=(Window.width / 2, Window.height / 1.7),
+            auto_dismiss=False,
+            background="images/lightBlue.jpg"
+        )
+        # Dandole la funcion de salir del pop up
+        ok_button.bind(on_press=self.popup.dismiss)
+        self.popup.open()
+
+'''--------------------------- FINALIZA: AQUI SE CONFIGURA EL POPUP DE EXTRA -------------------------------------------------------'''
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 '''--------------------------- AQUI SE CONFIGURA UN MENSAJE DE ALERTA PARA EL INGRESO -------------------------------------------------------'''
 class PopUpDescripcion(Popup):
     def __init__(self, item):
@@ -70,63 +158,143 @@ class PopUpDescripcion(Popup):
         #Creando un box Layout que contenga a todos los layouts
         boxlayoutContentComplete = BoxLayout(width=60, orientation='vertical')
 
-        #****** Creando el text que diga deslizar ***********
-        boxLayoutContentText = BoxLayout(orientation='vertical', size_hint_y=None)
-        contentText = MDLabel(
-            text= "Desliza -->",
-            font_name= "styles/Poppins-SemiBold.ttf",
-            font_size= "15sp",
-            halign = 'center',
-            theme_text_color= "Custom",
-            text_color= (60/255, 43/255, 117/255, 1),
-            size_hint_y=None
-        )
-        boxLayoutContentText.add_widget(contentText)
-        boxlayoutContentComplete.add_widget(boxLayoutContentText)
-        # ****** Finaliza: Creando el text que diga deslizar ***********
-
-
-
         # ****** Creando el carousel que tendra la informacion ***********
         boxLayoutContentCarousel = BoxLayout(width=60, orientation='vertical',size=(Window.width / 1.1, Window.height / 1.1))
         carousel = Carousel()
+
+        #Obteniendo el texto y dividiendolo
+        textosplit =item['ejercicioId']['descripcion']
+        splt = textosplit.split("+")
         #++++++++++++++++++++ Creando el card de Informacion de ejercicio +++++++++++++++++++++++++
         boxLayoutCardInformation = BoxLayout(width=60, orientation='vertical', size=(Window.width / 1.1, Window.height / 1.1))
         description = MDLabel(
-            text=str(item['ejercicioId']['nombre']+"\n"+item['ejercicioId']['descripcion']),
+            text=str(f"[b][size=20]{item['ejercicioId']['nombre']}[/size][/b]"+
+                     "\n"+"[b][size=15]Postura Inicial: [/size][/b]  "+splt[0]+
+                     "\n"+"[b][size=15]Postura final:  [/size][/b]  "+splt[1]),
             halign="center",
             font_name="styles/Poppins-SemiBold.ttf",
             font_size="10sp",
             theme_text_color="Custom",
             size_hint_y=None,
-            text_color=(60 / 255, 43 / 255, 117 / 255, 1))
+            text_color=(60 / 255, 43 / 255, 117 / 255, 1),
+            markup=True)
+
         boxLayoutCardInformation.add_widget(description)
         descriptionImage = AsyncImage(
             source=str(item['ejercicioId']['linkImagenFinal']),
             width=60
         )
-
         boxLayoutCardInformation.add_widget(descriptionImage)
         mdcard = MDCard(
-            size_hint=(1, 1),
+            size_hint=(0.7, 1),
             width=50,
-            pos_hint={"center_x": .5, "center_y": .5}
+            pos_hint={"center_x": .5, "center_y": .5},
+            md_bg_color="#eaf4f4"
         )
         # Ingresando la el boton dentro de la imagen y la imagen dentro del card
         # luego agregando el card al carousel
         mdcard.add_widget(boxLayoutCardInformation)
         # ++++++++++++++++++++ Finaliza: Creando el card de Informacion de ejercicio +++++++++++++++++++++++++
+
+
+
+        # ++++++++++++++++++++ Creando el card de Informacion de direccion frente a la camara +++++++++++++++++++++++++
+        # Obteniendo el texto y dividiendolo
+        textoPosicionCamara = f"[b][size=20]{item['ejercicioId']['posicionCamaraId']['titulo']}[/size][/b]"+\
+                              "\n"+f"{item['ejercicioId']['posicionCamaraId']['descripcion']}"
+
+        # ++++++++++++++++++++ Creando el card de Informacion de ejercicio +++++++++++++++++++++++++
+        boxLayoutCardCameraDescription = BoxLayout(width=60, orientation='vertical',
+                                             size=(Window.width / 1.1, Window.height / 1.1))
+        cameraDescription = MDLabel(
+            text=textoPosicionCamara,
+            halign="center",
+            font_name="styles/Poppins-SemiBold.ttf",
+            font_size="10sp",
+            theme_text_color="Custom",
+            size_hint_y=None,
+            text_color=(60 / 255, 43 / 255, 117 / 255, 1),
+            markup=True)
+
+        boxLayoutCardCameraDescription.add_widget(cameraDescription)
+        cameraDescriptionImage = AsyncImage(
+            source=str(item['ejercicioId']['posicionCamaraId']['imagenUrl']),
+            width=60
+        )
+        boxLayoutCardCameraDescription.add_widget(cameraDescriptionImage)
+        cameraMdcard = MDCard(
+            size_hint=(0.7, 1),
+            width=50,
+            pos_hint={"center_x": .5, "center_y": .5},
+            md_bg_color="#eaf4f4"
+        )
+        # Ingresando la el boton dentro de la imagen y la imagen dentro del card
+        # luego agregando el card al carousel
+        cameraMdcard.add_widget(boxLayoutCardCameraDescription)
+        # ++++++++++++++++++++ Finaliza: Creando el card de Informacion de direccion frente a la camara +++++++++++++++++++++++++
+
+        #Ingresando los dos cards al carousel
         carousel.add_widget(mdcard)
+        carousel.add_widget(cameraMdcard)
+
+
+        # ++++++++++++++++++++ Creando el card de Informacion imagen de ejercicio +++++++++++++++++++++++++
+        fotosIndicaciones = ['images/indicaciones.png', 'images/indicacionCorrectas.png', 'images/indicacionErronea.png']
+        for imagenIndicacion in fotosIndicaciones:
+            boxLayoutCardModuloDescription = BoxLayout(width=60, orientation='vertical',
+                                                       size=(Window.width / 1.1, Window.height / 1.1))
+
+            moduloDescription = MDLabel(
+                text="Informacion del Modulo de Angulos Corporales",
+                font_name="styles/Poppins-SemiBold.ttf",
+                font_size="10sp",
+                theme_text_color="Custom",
+                size_hint_y=None,
+                height= 20,
+                pos_hint = {"center_x":0.5},
+                text_color=(60 / 255, 43 / 255, 117 / 255, 1),
+                markup=True)
+            boxLayoutCardModuloDescription.add_widget(moduloDescription)
+
+            moduloDescriptionImage = AsyncImage(
+                source=imagenIndicacion,
+                width=80
+            )
+            boxLayoutCardModuloDescription.add_widget(moduloDescriptionImage)
+
+
+
+
+            moduloMdcard = MDCard(
+                size_hint=(0.7, 1),
+                width=50,
+                pos_hint={"center_x": .5, "center_y": .5},
+                md_bg_color="#eaf4f4"
+            )
+            # Ingresando la el boton dentro de la imagen y la imagen dentro del card
+            # luego agregando el card al carousel
+            moduloMdcard.add_widget(boxLayoutCardModuloDescription)
+            carousel.add_widget(moduloMdcard)
+            # ++++++++++++++++++++ Finaliza:   Creando el card de Informacion imagen de ejercicio +++++++++++++++++++++++++
+
+
+
+        # ++++++++++++++++++++ Finaliza: Creando el card de Informacion de ejercicio +++++++++++++++++++++++++
+
         boxLayoutContentCarousel.add_widget(carousel)
         boxlayoutContentComplete.add_widget(boxLayoutContentCarousel)
         # ****** Finaliza: Creando el carousel que tendra la informacion ***********
 
 
-
-
         # ++++++++++++++ Creando el boton de OK que lo ayudara a salir +++++++++++++
-        ok_button = MDRoundFlatButton(text='Ok', size_hint=(0.5, None), size=(Window.width / 8, Window.height / 15),
-                                        pos_hint={'center_x': 0.5, 'center_y': 0.5})
+        ok_button = MDRoundFlatButton(text='Ok',
+                                      size_hint=(0.5, None),
+                                      size=(Window.width / 8, Window.height / 15),
+                                      md_bg_color=(0, 0.12, 0.14, 0.69),
+                                      font_name="styles/Poppins-SemiBold.ttf",
+                                      text_color="white",
+                                      pos_hint={'center_x': 0.5, 'center_y': 0.5})
+
         boxlayoutContentComplete.add_widget(ok_button)
         # ++++++++++++++ Finaliza: Creando el boton de OK que lo ayudara a salir +++++++++++++
 
@@ -134,13 +302,13 @@ class PopUpDescripcion(Popup):
         content.add_widget(boxlayoutContentComplete)
         # *********************************** Creando el Pop Up ****************************
         self.popup = Popup(
-            title='ESCOGE UNA DE LAS CAMARAS',
+            title='DESCRIPCIÓN - DESLIZA -->',
             content=content,
             size_hint=(None, None),
             title_color=(0, 0, 0, 1),
             title_font="styles/Poppins-Regular.ttf",
-            title_size='30sp',
-            size=(Window.width / 2, Window.height / 1.5),
+            title_size='20sp',
+            size=(Window.width / 2, Window.height / 1.7),
             auto_dismiss=False,
             background="images/lightBlue.jpg"
         )
@@ -206,6 +374,7 @@ class PopUpCamera(Popup):
             size_hint = (1 , 1),
             allow_stretch = True # allow the video image to be scaled
         )
+
         boxLayoutImage.add_widget(self.imageVideo)
         boxLayoutContent.add_widget(boxLayoutImage)
 
@@ -304,19 +473,36 @@ class PopUpCamera(Popup):
 class Alert(Popup):
     def __init__(self, title, text):
         super(Alert, self).__init__()
-        content = AnchorLayout(anchor_x='center', anchor_y='bottom')
+        content = BoxLayout(orientation='vertical')
         content.add_widget(
-            Label(text=text, halign='center', valign='top', font_size= "25sp")
+            MDLabel(text=f'[b][size=20]{text}[/b]', halign='center',
+                    font_size= "40sp",
+                    text_color=(60 / 255, 43 / 255, 117 / 255, 1),
+                    pos_hint= {"center_x": .5},
+                    font_name="styles/Poppins-SemiBold.ttf",
+                    markup = True
+                    )
         )
-        ok_button = Button(text='Ok', size_hint=(None, None), size=(Window.width / 8, Window.height / 15))
+        #Creando el boton de OK
+        ok_button = MDRoundFlatButton(text='Ok',
+                                      size=(Window.width / 8, Window.height / 15),
+                                      md_bg_color=(0, 0.12, 0.14, 0.69),
+                                      font_name="styles/Poppins-SemiBold.ttf",
+                                      text_color="white",
+                                      pos_hint={'center_x': 0.5, 'center_y': 0.9})
+
         content.add_widget(ok_button)
 
         popup = Popup(
-            title=title,
+            title='MENSAJE',
             content=content,
             size_hint=(None, None),
-            size=(Window.width / 2, Window.height / 2),
+            title_color=(0, 0, 0, 1),
+            title_font="styles/Poppins-Regular.ttf",
+            title_size='25sp',
+            size=(Window.width / 3, Window.height / 3),
             auto_dismiss=True,
+            background="images/lightBlue.jpg"
         )
         ok_button.bind(on_press=popup.dismiss)
         popup.open()
@@ -339,7 +525,6 @@ class MenuScreen(Screen):
         token = ''
 
         print('el print')
-
         #Llamando a la función para comprobar que el usuario existe en la BDD
         if(username != '' and password != ''):
             self.resetInformation()
@@ -372,7 +557,9 @@ class VideoScreen(Screen):
     def on_enter(self):
         #en este treading hacer lo del switch tambie, osea que al escoger tren inferior o algo active el threading de
         # self.parte inferior fortalecimiento o algo asi
+
         if parte == 'superior' and tipo == 'fortalecimiento':
+            caseExercise.returnValues()
             threading.Thread(target=self.doSuperiorFort, daemon=True).start()
 
         elif parte == 'inferior' and tipo == 'fortalecimiento':
@@ -414,15 +601,14 @@ class VideoScreen(Screen):
             # the partial function just says to call the specified method with the provided argument (Clock adds a time argument)
             Clock.schedule_once(partial(self.display_frame, frame))
 
-            #cv2.imshow('Hidden', frame)
-            #cv2.waitKey(1)
         self.cam.release()
         cv2.destroyAllWindows()
+
 
     def stop_vid(self):
         # stop the video capture loop
         self.do_vid = False
-        self.cam.release()
+        time.sleep(0.5)
 
     def display_frame(self, frame, dt):
         # display the current video frame in the kivy Image widget
@@ -448,6 +634,8 @@ class ListExerciseScreen(Screen):
     #*********************************** Al ingresar se carga la lista de ejercicios del usuario******************************************
     def on_enter(self):
         global usernameglobal, token
+
+        self.removeCarousel()
 
         #OBTENIENDO LA LISTA DE EJERCICIOS
         listaEjercicios = function.AppAPIRequest.calllist(self, token, usernameglobal)
@@ -496,7 +684,7 @@ class ListExerciseScreen(Screen):
 
 
                 #Creando Box Layout que contenga la imagen
-                boxLayoutContentImage = BoxLayout(orientation='vertical', padding= 10)
+                boxLayoutContentImage = BoxLayout(orientation='vertical')
                 asyncImage = AsyncImage(
                     source=str(element['ejercicioId']['linkImagenFinal']),
                     #height=90,
@@ -507,18 +695,47 @@ class ListExerciseScreen(Screen):
                 boxLayoutContentImage.add_widget(asyncImage)
                 boxlayoutContentComplete.add_widget(boxLayoutContentImage)
 
+
+
                 # Creando Box Layout el boton
+                boxLayoutContentButtons = BoxLayout(orientation='horizontal', size_hint_y=None, padding=10)
+                # Creando Box Layout el boton
+                buttonInfo = MDRoundFlatButton(
+                    text="INFO",
+                    font_name="styles/Poppins-SemiBold.ttf",
+                    text_color="white",
+                    md_bg_color=(0.33, 0.72, 0.76, 0.8),
+                    size_hint_y=None,
+                    padding=15,
+                    on_press=lambda x, item=element: self.clickInfo(item)
+                )
+                boxLayoutContentButtons.add_widget(buttonInfo)
+
+                # Creando Box Layout el boton
+                buttonInfoBlank = MDRoundFlatButton(
+                    text="INFO",
+                    font_name="styles/Poppins-SemiBold.ttf",
+                    text_color="#eaf4f4",
+                    md_bg_color=(0, 0, 0, 0),
+                    size_hint_y=None,
+                    line_color= (0, 0, 0, 0),
+                    padding=15,
+                )
+                boxLayoutContentButtons.add_widget(buttonInfoBlank)
+
                 button = MDRoundFlatButton(
-                    text= "REALIZA ESTE EJERCICIO!!!",
+                    text= "REALIZAR EJERCICIO!",
                     font_name="styles/Poppins-SemiBold.ttf",
                     text_color= "white",
                     md_bg_color= (0.33, 0.72, 0.76, 0.8),
                     size_hint_y=None,
-                    pos_hint={"center_x": .5},
                     padding = 15,
                     on_press = lambda x, item = element: self.click(item)
                 )
-                boxlayoutContentComplete.add_widget(button)
+                boxLayoutContentButtons.add_widget(button)
+
+
+                boxlayoutContentComplete.add_widget(boxLayoutContentButtons)
 
 
                 #Creando el Card
@@ -563,9 +780,12 @@ class ListExerciseScreen(Screen):
             'serieRealizada': 3}
         asignadoChoose = json_data
         #Finaliza: Configurando el objeto de Cumplimiento para enviarlo
-
-        #PopUpDescripcion(item = itemEjercicio)
         MDApp.get_running_app().root.current = 'video'
+
+
+    #En caso de que se presione en el Info del ejercicio
+    def clickInfo(self, itemEjercicio):
+        PopUpDescripcion(item = itemEjercicio)
 
 
 
@@ -573,7 +793,6 @@ class ListExerciseScreen(Screen):
     #+++++++++++++++++++++++++++++++++ CAMERA +++++++++++++++++++++++++++
     def btnCamara(self):
         #Creando un hilo que abrirá la cámara
-
         self.crearPopUpCamera()
 
     def crearPopUpCamera(self):
@@ -597,7 +816,7 @@ class ListExerciseScreen(Screen):
 
     # +++++++++++++++++++++++++++++++++ EXTRA INFORMATION +++++++++++++++++++++++++++
     def btnInformacion(self):
-        pass
+        PopUpExtra()
 
 
 
