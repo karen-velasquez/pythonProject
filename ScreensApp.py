@@ -47,7 +47,7 @@ serie = 1
 asignadoChoose = {}
 
 #La variable global de la camara
-camera = 2
+camera = 0
 
 
 
@@ -180,11 +180,18 @@ class PopUpDescripcion(Popup):
             markup=True)
 
         boxLayoutCardInformation.add_widget(description)
+        boxLayoutCardImages = BoxLayout(width=60, orientation='horizontal')
         descriptionImage = AsyncImage(
+            source=str(item['ejercicioId']['linkImagenInicio']),
+            width=60
+        )
+        descriptionImageFinal = AsyncImage(
             source=str(item['ejercicioId']['linkImagenFinal']),
             width=60
         )
-        boxLayoutCardInformation.add_widget(descriptionImage)
+        boxLayoutCardImages.add_widget(descriptionImage)
+        boxLayoutCardImages.add_widget(descriptionImageFinal)
+        boxLayoutCardInformation.add_widget(boxLayoutCardImages)
         mdcard = MDCard(
             size_hint=(0.7, 1),
             width=50,

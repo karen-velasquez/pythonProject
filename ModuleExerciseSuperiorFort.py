@@ -234,9 +234,18 @@ def draw_left_hip_arm(results, image):
         # Confirgurando el color de la linea
         color_line = (255, 255, 255)
         color_circle = (255, 255, 255)
-    else:
+
+    elif stage == "final" and stagetwo == "inter":
+        color_line = (0, 255, 0)
+        color_circle = (0, 255, 0)
+
+    elif stage == "final" and stagetwo == "final":
         color_line = (0, 0, 255)
         color_circle = (0, 0, 255)
+
+    else:
+        color_line = (255, 0, 0)
+        color_circle = (255, 0, 0)
 
     cv2.line(image, (x1, y1), (x2, y2), color_line, 3)
     cv2.line(image, (x3, y3), (x2, y2), color_line, 3)
@@ -521,8 +530,105 @@ def flexionCodo(results, image):
 
 
 
+
+
+
+
 #Ejercicio de flexion de hombro
 def flexionHombro(results, image):
+    #Ingresando al global stage para modificarlo
+    global stage, stagetwo, counter, wrong_counter
+
+    #Verificando que se vean los puntos del brazo
+    if (results.pose_landmarks.landmark[15].visibility > 0.90 and results.pose_landmarks.landmark[23].visibility > 0.90):
+
+
+        left_arm_hip_angle = leftArmHipAngle(results, image, )
+
+
+        #HILO: Creando el draw bar
+        threading.Thread(target=draw_cv2_bar, args=(left_arm_hip_angle,85,10,400, 150,image,)).start()
+
+        #Si el angulo es mayor a 160 entonces se encuentra en la posicion inicial
+        if left_arm_hip_angle < 15:
+            stage = "inicial"
+
+        '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
+        global startCounter, nSecond, totalSec, timeElapsed, saveCount, startTime
+        if stage == "inicial":
+            if startCounter:
+                if nSecond < totalSec:
+                    # draw the Nth second on each frame
+                    cv2.circle(image, (510, 420), 60, (255, 0, 0), -1)
+                    cv2.putText(image, strSec[nSecond], (480, 450), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 5,
+                                cv2.LINE_AA)  # adding timer text
+
+                    timeElapsed = (datetime.now() - startTime).total_seconds()
+
+                    if timeElapsed >= 1:
+                        nSecond += 1
+                        timeElapsed = 0
+                        startTime = datetime.now()
+
+                else:
+                    saveCount += 1
+                    startCounter = False
+                    nSecond = 0
+        '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
+
+        if left_arm_hip_angle > 75 and left_arm_hip_angle < 85 and stage == "inicial":
+            if nSecond>0:
+                stage = 'final'
+                stagetwo = 'final'
+                wrong_counter = wrong_counter + 1
+                counter = counter + 1
+                feedback = 'muy rapido'
+                #HILO: Informando del error de tiempo : muy rapido!!!
+                threading.Thread(target=text_to_speech, args=(feedback,)).start()
+
+                '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
+                startCounter = True
+                startTime = datetime.now()
+                nSecond = 0
+                '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
+
+            else:
+                stage = "final"
+                stagetwo = "inter"
+                counter = counter + 1
+                #HILO: Contabilizando la cantidad de repeticiones
+                threading.Thread(target=text_correct_exercise, args=()).start()
+
+                '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
+                startCounter = True
+                startTime = datetime.now()
+                nSecond = 0
+                '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
+
+        elif left_arm_hip_angle >= 85 and stagetwo=="inter":
+            stage = "final"
+            stagetwo = "final"
+            feedback = "Subes mucho tu brazo"
+            wrong_counter = wrong_counter + 1
+            #Informando del error de flexion
+            threading.Thread(target=text_to_speech, args=(feedback,)).start()
+
+            '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
+            startCounter = True
+            startTime = datetime.now()
+            nSecond = 0
+
+    else:
+        feedback = 'NO SE VE TU\n  CADERA O\n   BRAZO'
+        #HILO: Creando el hilo que indica si se ven los puntos necesarios para el analisis
+        threading.Thread(target=draw_cv2_error, args=(feedback, image,)).start()
+
+
+
+
+
+#Ejercicio de flexion de hombro
+def flexionHombro1(results, image):
     #Ingresando al global stage para modificarlo
     global stage, counter, wrong_counter
 
@@ -643,41 +749,33 @@ def pose_estimation_flexion_codo(image, amount, serie, asignadoChoose):
 # ----------------------------------- FLEXION DE HOMBRO HACIA ADELANTE ----------------------------
 def pose_estimation_flexion_hombro_adelante(image, amount, serie, asignadoChoose):
     #Obteniendo las variables globales
-    global counter, exercise_serie, mp_pose, mp_drawing, cumplimientoObjectUpdate, montoNecesario
-
+    global counter, exercise_serie, mp_pose, mp_drawing, cumplimientoObjectUpdate, montoNecesario, cumplimientoflag
     cumplimientoObjectUpdate = asignadoChoose
     montoNecesario = amount
     #Variable resultados
     if counter<amount and exercise_serie<serie:
         # Extract landmarks
         try:
-            #Obteniendo el result pose
+            # Obteniendo el result pose
             results = poseProcess(image)
             if results.pose_landmarks is not None:
                 #Ingresando al target que hara el calculo de angulos corporales
                 threading.Thread(target=flexionHombro, args=(results, image), kwargs={}).start()
-
-
+                # dandole a cumplimiento el valor de counter
+                cumplimientoflag = counter
         except:
             pass
-
         #HILO: Dibuja sobre el cv2 los contadores y numeros
         threading.Thread(target=draw_cv2, args=(image,)).start()
-
-
-
-        '''EN CASO DE QUE EL EJERCICIO HAYA CUMPLIDO CON EL CONTADOR PERO AUN NO CON LA SERIE'''
     elif exercise_serie<serie:
+        '''EN CASO DE QUE EL EJERCICIO HAYA CUMPLIDO CON EL CONTADOR PERO AUN NO CON LA SERIE'''
         #HILO: Contador hacia atras para descanso
         threading.Thread(target=time_counter, args=(image,)).start()
     else:
         # HILO: Contador que salta un mensaje de finalizacion serie y
         #devuelve todos los valores a su valor original
         threading.Thread(target=serie_counter, args=(image,)).start()
-
-
     return image
-
 
 
 
