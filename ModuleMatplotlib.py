@@ -6,13 +6,19 @@ from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationTool
 import mplcyberpunk
 import numpy as np
 matplotlib.style.use("cyberpunk")
+import tkinter as tk
 
 import pandas as pd
 import requests  #Importamos la librería requests
 import json
 
 #Este es el endpoint donde se realiza la consulta
-endpoint = 'http://springbootbackend-env.eba-mmt3kmxg.us-east-1.elasticbeanstalk.com/'
+endpoint = 'http://fisioterapiasystem-env.eba-ttpvm6wh.us-east-1.elasticbeanstalk.com/'
+
+
+
+
+
 
 
 ''' ---------------------------------------- ANALIZANDO LA ENTRADA DE DATOS CON MATPLOLIB -----------------------------------------------------------'''
@@ -169,16 +175,20 @@ def plotEjercicios(usernameGlobal, token):
     canvas.get_tk_widget().pack()
     toolbar = NavigationToolbar2Tk(canvas, window)
     toolbar.update()
+
     canvas.get_tk_widget().pack()
 
     window.title('Avances')
-    window.state('zoomed')  # zooms the screen to maxm whenever executed
+    #window.state('zoomed')  # zooms the screen to maxm whenever executed
 
     '''plot_button = Button(master=window, command=plot, height=2, width=10, text="Plot")
     plot_button.pack()'''
-    window.mainloop()
-    time.sleep(1)
 
+
+
+    window.mainloop()
+
+    time.sleep(1)
 
 
 

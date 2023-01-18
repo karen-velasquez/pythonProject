@@ -3,7 +3,7 @@ import APIRequest as request
 
 #endpoint = 'http://localhost:5000/'
 # Inicializando
-endpoint = 'http://springbootbackend-env.eba-mmt3kmxg.us-east-1.elasticbeanstalk.com/'
+endpoint = 'http://fisioterapiasystem-env.eba-ttpvm6wh.us-east-1.elasticbeanstalk.com/'
 token = ''
 class AppAPIRequest():
 
@@ -35,8 +35,6 @@ def saveCumplimiento(cumplimientoAsignadoChoose):
     global token, endpoint
     cumplimientoObject = request.guardarCumplimiento(token, endpoint, cumplimientoAsignadoChoose)
     return cumplimientoObject
-
-
 
 
 

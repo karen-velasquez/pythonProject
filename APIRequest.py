@@ -37,7 +37,7 @@ class APIRequest():
 
         #obteniendo la data
         data = request.json()
-
+        print(data)
         if (request.status_code == 200):
             # Obteniendo el data del request
             return data

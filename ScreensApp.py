@@ -39,17 +39,27 @@ usernameglobal = ''
 #Guardando el token en una variable para luego realizar las peticiones
 token = ''
 #El ejercicio a realizar
-ejercicio = 'Flexion codo'
+ejercicio = 'Remos dorsales'
 tipo = 'fortalecimiento'
 parte = 'superior'
-amount = 2
-serie = 1
-asignadoChoose = {}
+amount = 10
+serie = 2
+#asignadoChoose = {}
 
 #La variable global de la camara
+camera1 = "C:/Users/asus/Desktop/mi_video/video5.mp4"
+
 camera = 0
+#La variable global de la camara
+camera2 ="C:/Users/asus/Desktop/Videos_Ejercicios/videos_grals/TrenSuperior/Fortalecimiento/remosdorsales.mp4"
 
 
+asignadoChoose = {
+            'fechaCumplimiento':"2022-11-25",
+            "asignadoId": {
+                "asignadoId": "2"},
+            'aciertos': 0,
+            'serieRealizada': 3}
 
 
 '''--------------------------- AQUI SE CONFIGURA EL POPUP DE EXTRA -------------------------------------------------------'''
@@ -105,7 +115,7 @@ class PopUpExtra(Popup):
                                       size_hint=(0.5, None),
                                       size=(Window.width / 8, Window.height / 15),
                                       md_bg_color=(0, 0.12, 0.14, 0.69),
-                                      font_name="styles/Poppins-SemiBold.ttf",
+                                      font_name="images/Poppins-SemiBold.ttf",
                                       text_color="white",
                                       pos_hint={'center_x': 0.5, 'center_y': 0.5})
 
@@ -120,7 +130,7 @@ class PopUpExtra(Popup):
             content=content,
             size_hint=(None, None),
             title_color=(0, 0, 0, 1),
-            title_font="styles/Poppins-Regular.ttf",
+            title_font="images/Poppins-Regular.ttf",
             title_size='20sp',
             size=(Window.width / 2, Window.height / 1.7),
             auto_dismiss=False,
@@ -172,7 +182,7 @@ class PopUpDescripcion(Popup):
                      "\n"+"[b][size=15]Postura Inicial: [/size][/b]  "+splt[0]+
                      "\n"+"[b][size=15]Postura final:  [/size][/b]  "+splt[1]),
             halign="center",
-            font_name="styles/Poppins-SemiBold.ttf",
+            font_name="images/Poppins-SemiBold.ttf",
             font_size="10sp",
             theme_text_color="Custom",
             size_hint_y=None,
@@ -216,7 +226,7 @@ class PopUpDescripcion(Popup):
         cameraDescription = MDLabel(
             text=textoPosicionCamara,
             halign="center",
-            font_name="styles/Poppins-SemiBold.ttf",
+            font_name="images/Poppins-SemiBold.ttf",
             font_size="10sp",
             theme_text_color="Custom",
             size_hint_y=None,
@@ -253,7 +263,7 @@ class PopUpDescripcion(Popup):
 
             moduloDescription = MDLabel(
                 text="Informacion del Modulo de Angulos Corporales",
-                font_name="styles/Poppins-SemiBold.ttf",
+                font_name="images/Poppins-SemiBold.ttf",
                 font_size="10sp",
                 theme_text_color="Custom",
                 size_hint_y=None,
@@ -298,7 +308,7 @@ class PopUpDescripcion(Popup):
                                       size_hint=(0.5, None),
                                       size=(Window.width / 8, Window.height / 15),
                                       md_bg_color=(0, 0.12, 0.14, 0.69),
-                                      font_name="styles/Poppins-SemiBold.ttf",
+                                      font_name="images/Poppins-SemiBold.ttf",
                                       text_color="white",
                                       pos_hint={'center_x': 0.5, 'center_y': 0.5})
 
@@ -313,7 +323,7 @@ class PopUpDescripcion(Popup):
             content=content,
             size_hint=(None, None),
             title_color=(0, 0, 0, 1),
-            title_font="styles/Poppins-Regular.ttf",
+            title_font="images/Poppins-Regular.ttf",
             title_size='20sp',
             size=(Window.width / 2, Window.height / 1.7),
             auto_dismiss=False,
@@ -360,7 +370,7 @@ class PopUpCamera(Popup):
             button = MDRoundFlatButton(
                 text=f'  CAMARA {listCameras[i]}  ',
                 md_bg_color=(0.02, 0.35, 0.42, 0.69),
-                font_name="styles/Poppins-SemiBold.ttf",
+                font_name="images/Poppins-SemiBold.ttf",
                 text_color="white",
                 # on_press = lambda x, item=element: print("\nitem number\n", item),
                 on_press =lambda x, item=listCameras[i]: self.click_camera(item),
@@ -392,7 +402,7 @@ class PopUpCamera(Popup):
                                       size_hint=(0.5, None),
                                       size=(Window.width / 8, Window.height / 15),
                                       md_bg_color=(0, 0.12, 0.14, 0.69),
-                                      font_name="styles/Poppins-SemiBold.ttf",
+                                      font_name="images/Poppins-SemiBold.ttf",
                                       text_color="white",
                                       pos_hint= {'center_x':0.5, 'center_y':0.5})
         boxlayoutContentComplete.add_widget(ok_button)
@@ -406,7 +416,7 @@ class PopUpCamera(Popup):
             content=content,
             size_hint=(None, None),
             title_color = (0,0,0,1),
-            title_font = "styles/Poppins-Regular.ttf",
+            title_font = "images/Poppins-Regular.ttf",
             title_size = '30sp',
             size=(Window.width / 3, Window.height / 2),
             auto_dismiss=False,
@@ -486,7 +496,7 @@ class Alert(Popup):
                     font_size= "40sp",
                     text_color=(60 / 255, 43 / 255, 117 / 255, 1),
                     pos_hint= {"center_x": .5},
-                    font_name="styles/Poppins-SemiBold.ttf",
+                    font_name="images/Poppins-SemiBold.ttf",
                     markup = True
                     )
         )
@@ -494,7 +504,7 @@ class Alert(Popup):
         ok_button = MDRoundFlatButton(text='Ok',
                                       size=(Window.width / 8, Window.height / 15),
                                       md_bg_color=(0, 0.12, 0.14, 0.69),
-                                      font_name="styles/Poppins-SemiBold.ttf",
+                                      font_name="images/Poppins-SemiBold.ttf",
                                       text_color="white",
                                       pos_hint={'center_x': 0.5, 'center_y': 0.9})
 
@@ -505,7 +515,7 @@ class Alert(Popup):
             content=content,
             size_hint=(None, None),
             title_color=(0, 0, 0, 1),
-            title_font="styles/Poppins-Regular.ttf",
+            title_font="images/Poppins-Regular.ttf",
             title_size='25sp',
             size=(Window.width / 3, Window.height / 3),
             auto_dismiss=True,
@@ -600,11 +610,12 @@ class VideoScreen(Screen):
         self.do_vid = True  # flag to stop loop
         self.cam = cv2.VideoCapture(camera)
 
-        while (self.do_vid):
-            global ejercicio, serie, amount
+        #while (self.do_vid):
+        while (self.cam.isOpened()):
+            global ejercicio, serie, amount, asignadoChoose
             ret, frame = self.cam.read()
 
-            frame = caseExercise.switch_inferior_fortalecimiento(frame, ejercicio, amount, serie)
+            frame = caseExercise.switch_inferior_fortalecimiento(frame, ejercicio, amount, serie, asignadoChoose)
             # the partial function just says to call the specified method with the provided argument (Clock adds a time argument)
             Clock.schedule_once(partial(self.display_frame, frame))
 
@@ -666,7 +677,7 @@ class ListExerciseScreen(Screen):
 
                 contentTitle = MDLabel(
                     text=asignadoTitle,
-                    font_name="styles/Poppins-SemiBold.ttf",
+                    font_name="images/Poppins-SemiBold.ttf",
                     font_size="15sp",
                     halign='center',
                     pos_hint={"center_y": .8},
@@ -676,7 +687,7 @@ class ListExerciseScreen(Screen):
                 )
                 contentText = MDLabel(
                     text=asignadoText,
-                    font_name="styles/Poppins-SemiBold.ttf",
+                    font_name="images/Poppins-SemiBold.ttf",
                     font_size="15sp",
                     halign='left',
                     theme_text_color="Custom",
@@ -709,7 +720,7 @@ class ListExerciseScreen(Screen):
                 # Creando Box Layout el boton
                 buttonInfo = MDRoundFlatButton(
                     text="INFO",
-                    font_name="styles/Poppins-SemiBold.ttf",
+                    font_name="images/Poppins-SemiBold.ttf",
                     text_color="white",
                     md_bg_color=(0.33, 0.72, 0.76, 0.8),
                     size_hint_y=None,
@@ -721,7 +732,7 @@ class ListExerciseScreen(Screen):
                 # Creando Box Layout el boton
                 buttonInfoBlank = MDRoundFlatButton(
                     text="INFO",
-                    font_name="styles/Poppins-SemiBold.ttf",
+                    font_name="images/Poppins-SemiBold.ttf",
                     text_color="#eaf4f4",
                     md_bg_color=(0, 0, 0, 0),
                     size_hint_y=None,
@@ -732,7 +743,7 @@ class ListExerciseScreen(Screen):
 
                 button = MDRoundFlatButton(
                     text= "REALIZAR EJERCICIO!",
-                    font_name="styles/Poppins-SemiBold.ttf",
+                    font_name="images/Poppins-SemiBold.ttf",
                     text_color= "white",
                     md_bg_color= (0.33, 0.72, 0.76, 0.8),
                     size_hint_y=None,
@@ -854,5 +865,5 @@ class DemoApp(MDApp):
 ''' ---------------------------------------- FINALIZA: CONFIGURANDO LA PANTALLA PRINCIPAL  --------------------------------------------'''
 
 
-#Inicializando la DemoApp()
-DemoApp().run()
+if __name__ in ('__main__', '__android__'):
+    DemoApp().run()

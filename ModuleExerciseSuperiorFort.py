@@ -259,6 +259,51 @@ def draw_left_hip_arm(results, image):
 
 
 
+#Dibujando solo los puntos y lineas del brazo
+def draw_left_shoulder_hip_knee (results, image):
+    global stage, stagetwo
+    height, width, _ = image.shape
+    x1 = int(results.pose_landmarks.landmark[11].x * width)
+    y1 = int(results.pose_landmarks.landmark[11].y * height)
+    x2 = int(results.pose_landmarks.landmark[23].x * width)
+    y2 = int(results.pose_landmarks.landmark[23].y * height)
+    x3 = int(results.pose_landmarks.landmark[25].x * width)
+    y3 = int(results.pose_landmarks.landmark[25].y * height)
+
+    color_line = (0, 0, 255)
+    color_circle = (0, 0, 255)
+
+    if stage == 'inicial':
+        # Confirgurando el color de la linea
+        color_line = (255, 255, 255)
+        color_circle = (255, 255, 255)
+
+    elif stage == "final" and stagetwo == "inter":
+        color_line = (0, 255, 0)
+        color_circle = (0, 255, 0)
+
+    elif stage == "final" and stagetwo == "final":
+        color_line = (0, 0, 255)
+        color_circle = (0, 0, 255)
+
+    else:
+        color_line = (255, 0, 0)
+        color_circle = (255, 0, 0)
+
+    cv2.line(image, (x1, y1), (x2, y2), color_line, 3)
+    cv2.line(image, (x3, y3), (x2, y2), color_line, 3)
+    cv2.circle(image, (x1, y1), 10, color_circle, cv2.FILLED)
+    cv2.circle(image, (x1, y1), 15, color_circle, 2)
+    cv2.circle(image, (x2, y2), 10, color_circle, cv2.FILLED)
+    cv2.circle(image, (x2, y2), 15, color_circle, 2)
+    cv2.circle(image, (x3, y3), 10, color_circle, cv2.FILLED)
+    cv2.circle(image, (x3, y3), 15, color_circle, 2)
+
+
+
+
+
+
 
 
 '''---------------------------- FINALIZA: OBTENIENDO LA IMAGEN SOLO DE LOS PUNTOS ---------------------------------------------------'''
@@ -416,8 +461,20 @@ def leftArmHipAngle(results, image):
     return calculate_angle(left_hip, left_shoulder, left_wrist)
 
 
+# **************** CALCULANDO EL ANGULO DEL BRAZO IZQUIERDO ******************************
+def leftShoulderHipKneeAngle(results, image):
+    height, width, _ = image.shape
 
+    left_shoulder = [int(results.pose_landmarks.landmark[11].x * width),
+                     int(results.pose_landmarks.landmark[11].y * height)]
+    left_hip = [int(results.pose_landmarks.landmark[23].x * width),
+                  int(results.pose_landmarks.landmark[23].y * height)]
+    left_knee = [int(results.pose_landmarks.landmark[25].x * width),
+                  int(results.pose_landmarks.landmark[25].y * height)]
 
+    threading.Thread(target=draw_left_shoulder_hip_knee, args=(results, image,)).start()
+
+    return calculate_angle(left_shoulder, left_hip, left_knee)
 
 '''---------------------------- FINALIZA: CALCULANDO LOS ANGULOS NECESARIOS ---------------------------------------------------'''
 
@@ -544,6 +601,8 @@ def flexionHombro(results, image):
 
 
         left_arm_hip_angle = leftArmHipAngle(results, image, )
+        print("LA VISIBILIDAD DE LA CADERA DERECHA")
+        print(results.pose_landmarks.landmark[24].visibility)
 
 
         #HILO: Creando el draw bar
@@ -622,6 +681,217 @@ def flexionHombro(results, image):
         feedback = 'NO SE VE TU\n  CADERA O\n   BRAZO'
         #HILO: Creando el hilo que indica si se ven los puntos necesarios para el analisis
         threading.Thread(target=draw_cv2_error, args=(feedback, image,)).start()
+
+
+
+
+
+
+
+
+
+
+
+
+#Ejercicio de flexion de hombro
+def flexionHombroLateral(results, image):
+    #Ingresando al global stage para modificarlo
+    global stage, stagetwo, counter, wrong_counter
+
+    #Verificando que se vean los puntos del brazo
+    if (results.pose_landmarks.landmark[15].visibility > 0.90 and results.pose_landmarks.landmark[23].visibility > 0.90):
+
+        #Obteniendo el angulo del codo y la cadera
+        left_arm_hip_angle = leftArmHipAngle(results, image, )
+
+        #Obteniendo el angulo del brazo
+        left_arm_angle = leftArmAngle(results, image, )
+        print("EL ANGULO DEL BRAZO ERRONEO")
+        print(left_arm_angle)
+
+
+        #HILO: Creando el draw bar
+        threading.Thread(target=draw_cv2_bar, args=(left_arm_hip_angle,85,10,400, 150,image,)).start()
+
+        #Si el angulo es mayor a 160 entonces se encuentra en la posicion inicial
+        if left_arm_hip_angle < 15:
+            stage = "inicial"
+
+        '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
+        global startCounter, nSecond, totalSec, timeElapsed, saveCount, startTime
+        if stage == "inicial":
+            if startCounter:
+                if nSecond < totalSec:
+                    # draw the Nth second on each frame
+                    cv2.circle(image, (510, 420), 60, (255, 0, 0), -1)
+                    cv2.putText(image, strSec[nSecond], (480, 450), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 5,
+                                cv2.LINE_AA)  # adding timer text
+
+                    timeElapsed = (datetime.now() - startTime).total_seconds()
+
+                    if timeElapsed >= 1:
+                        nSecond += 1
+                        timeElapsed = 0
+                        startTime = datetime.now()
+
+                else:
+                    saveCount += 1
+                    startCounter = False
+                    nSecond = 0
+        '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
+
+        if left_arm_hip_angle > 75 and left_arm_hip_angle < 85 and stage == "inicial":
+            if nSecond>0:
+                stage = 'final'
+                stagetwo = 'final'
+                wrong_counter = wrong_counter + 1
+                counter = counter + 1
+                feedback = 'muy rapido'
+                #HILO: Informando del error de tiempo : muy rapido!!!
+                threading.Thread(target=text_to_speech, args=(feedback,)).start()
+
+                '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
+                startCounter = True
+                startTime = datetime.now()
+                nSecond = 0
+                '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
+
+            else:
+                stage = "final"
+                stagetwo = "inter"
+                counter = counter + 1
+                #HILO: Contabilizando la cantidad de repeticiones
+                threading.Thread(target=text_correct_exercise, args=()).start()
+
+                '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
+                startCounter = True
+                startTime = datetime.now()
+                nSecond = 0
+                '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
+
+        elif left_arm_hip_angle >= 85 and stagetwo=="inter":
+            stage = "final"
+            stagetwo = "final"
+            feedback = "Subes mucho tu brazo"
+            wrong_counter = wrong_counter + 1
+            #Informando del error de flexion
+            threading.Thread(target=text_to_speech, args=(feedback,)).start()
+
+            '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
+            startCounter = True
+            startTime = datetime.now()
+            nSecond = 0
+
+    else:
+        feedback = 'NO SE VE TU\n  CADERA O\n   BRAZO'
+        #HILO: Creando el hilo que indica si se ven los puntos necesarios para el analisis
+        threading.Thread(target=draw_cv2_error, args=(feedback, image,)).start()
+
+
+
+
+
+
+
+
+
+
+#Ejercicio de flexion de hombro
+def RemosDorsales(results, image):
+    #Ingresando al global stage para modificarlo
+    global stage, stagetwo, counter, wrong_counter
+
+    #Verificando que se vean los puntos del brazo
+    if (results.pose_landmarks.landmark[15].visibility > 0.90 and results.pose_landmarks.landmark[23].visibility > 0.90):
+
+        #Obteniendo el angulo del codo y la cadera
+        left_arm_hip_angle = leftArmHipAngle(results, image, )
+
+        left_arm_angle = leftArmAngle(results, image, )
+
+        #Obteniendo el angulo de la hombro cadera rodilla
+
+        left_Shoulder_Hip_Knee_Angle = leftShoulderHipKneeAngle(results, image, )
+        print(" el hombro cadera rodilla ")
+        print(left_Shoulder_Hip_Knee_Angle)
+
+        #HILO: Creando el draw bar
+        threading.Thread(target=draw_cv2_bar, args=(left_arm_hip_angle,85,10,400, 150,image,)).start()
+
+        #Si el angulo es mayor a 160 entonces se encuentra en la posicion inicial
+        if left_Shoulder_Hip_Knee_Angle < 150:
+            stage = "inicial"
+
+        '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
+        global startCounter, nSecond, totalSec, timeElapsed, saveCount, startTime
+        if stage == "inicial":
+            if startCounter:
+                if nSecond < totalSec:
+                    # draw the Nth second on each frame
+                    cv2.circle(image, (510, 420), 60, (255, 0, 0), -1)
+                    cv2.putText(image, strSec[nSecond], (480, 450), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 5,
+                                cv2.LINE_AA)  # adding timer text
+
+                    timeElapsed = (datetime.now() - startTime).total_seconds()
+
+                    if timeElapsed >= 1:
+                        nSecond += 1
+                        timeElapsed = 0
+                        startTime = datetime.now()
+
+                else:
+                    saveCount += 1
+                    startCounter = False
+                    nSecond = 0
+        '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
+
+        if left_arm_hip_angle > 75 and left_arm_hip_angle < 85 and stage == "inicial":
+            if nSecond>0:
+                stage = 'final'
+                stagetwo = 'final'
+                wrong_counter = wrong_counter + 1
+                counter = counter + 1
+                feedback = 'muy rapido'
+                #HILO: Informando del error de tiempo : muy rapido!!!
+                threading.Thread(target=text_to_speech, args=(feedback,)).start()
+
+                '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
+                startCounter = True
+                startTime = datetime.now()
+                nSecond = 0
+                '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
+
+            else:
+                stage = "final"
+                stagetwo = "inter"
+                counter = counter + 1
+                #HILO: Contabilizando la cantidad de repeticiones
+                threading.Thread(target=text_correct_exercise, args=()).start()
+
+                '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
+                startCounter = True
+                startTime = datetime.now()
+                nSecond = 0
+                '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
+
+        elif left_arm_hip_angle >= 85 and stagetwo=="inter":
+            stage = "final"
+            stagetwo = "final"
+            feedback = "Subes mucho tu brazo"
+            wrong_counter = wrong_counter + 1
+            #Informando del error de flexion
+            threading.Thread(target=text_to_speech, args=(feedback,)).start()
+
+            '''xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'''
+            startCounter = True
+            startTime = datetime.now()
+            nSecond = 0
+
+    else:
+        feedback = 'NO SE VE TU\n  CADERA O\n   BRAZO'
+        #HILO: Creando el hilo que indica si se ven los puntos necesarios para el analisis
+        threading.Thread(target=draw_cv2_error, args=(feedback, image,)).start()
+
 
 
 
@@ -782,7 +1052,7 @@ def pose_estimation_flexion_hombro_adelante(image, amount, serie, asignadoChoose
 # ----------------------------------- ABDUCCION HOMBRO LATERAL ----------------------------------
 def pose_estimation_abduccion_hombro_lateral(image, amount, serie, asignadoChoose):
     #Obteniendo las variables globales
-    global counter, exercise_serie, mp_pose, mp_drawing, cumplimientoObjectUpdate, montoNecesario
+    global counter, exercise_serie, mp_pose, mp_drawing, cumplimientoObjectUpdate, montoNecesario, cumplimientoflag
     cumplimientoObjectUpdate = asignadoChoose
     montoNecesario = amount
     #Variable resultados
@@ -795,9 +1065,50 @@ def pose_estimation_abduccion_hombro_lateral(image, amount, serie, asignadoChoos
             height, width, _ = image.shape
 
 
-            '''if results.pose_landmarks is not None:
+            if results.pose_landmarks is not None:
                 #Ingresando al target que hara el calculo de angulos corporales
-                threading.Thread(target=flexionHombro, args=(results, image), kwargs={}).start()'''
+                threading.Thread(target=flexionHombroLateral, args=(results, image), kwargs={}).start()
+                cumplimientoflag = counter
+
+        except:
+            pass
+
+        #HILO: Dibuja sobre el cv2 los contadores y numeros
+        threading.Thread(target=draw_cv2, args=(image,)).start()
+
+        '''EN CASO DE QUE EL EJERCICIO HAYA CUMPLIDO CON EL CONTADOR PERO AUN NO CON LA SERIE'''
+    elif exercise_serie<serie:
+        #HILO: Contador hacia atras para descanso
+        threading.Thread(target=time_counter, args=(image,)).start()
+    else:
+        # HILO: Contador que salta un mensaje de finalizacion serie y
+        #devuelve todos los valores a su valor original
+        threading.Thread(target=serie_counter, args=(image,)).start()
+    return image
+
+
+
+
+# ----------------------------------- REMOS DORSALES ----------------------------------
+def pose_estimation_remos_dorsales (image, amount, serie, asignadoChoose):
+    #Obteniendo las variables globales
+    global counter, exercise_serie, mp_pose, mp_drawing, cumplimientoObjectUpdate, montoNecesario, cumplimientoflag
+    cumplimientoObjectUpdate = asignadoChoose
+    montoNecesario = amount
+    #Variable resultados
+    if counter<amount and exercise_serie<serie:
+        # Extract landmarks
+        try:
+            #Obteniendo el result pose
+            results = poseProcess(image)
+
+            height, width, _ = image.shape
+
+
+            if results.pose_landmarks is not None:
+                #Ingresando al target que hara el calculo de angulos corporales
+                threading.Thread(target=RemosDorsales, args=(results, image), kwargs={}).start()
+                cumplimientoflag = counter
 
 
         except:
@@ -814,9 +1125,8 @@ def pose_estimation_abduccion_hombro_lateral(image, amount, serie, asignadoChoos
         # HILO: Contador que salta un mensaje de finalizacion serie y
         #devuelve todos los valores a su valor original
         threading.Thread(target=serie_counter, args=(image,)).start()
-
-
     return image
+
 
 '''++++++++++++++++++++++++++++++++++++ FINALIZA: OBTENIENDO EL PROCESAMIENTO DE POSES ++++++++++++++++++++++++++++++++++++++++++++++'''
 
@@ -839,7 +1149,8 @@ def time_counter(image):
         # retornando los valores a su valor original
         print("wrong counter " + str(wrong_counter))
         print("monto necesario" + str(montoNecesario))
-        cumplimientoObjectUpdate.update({'aciertos': aciertos })
+        cumplimientoObjectUpdate.update({'aciertos': aciertos})
+        print(cumplimientoObjectUpdate)
         function.saveCumplimiento(cumplimientoObjectUpdate)
 
     #-------------Texto de cantidad de aciertos que se pondra
